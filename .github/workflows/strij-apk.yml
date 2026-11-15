@@ -1,13 +1,11 @@
-# «Стриж» — лёгкая сборка ТОЛЬКО подписанного Android APK (Фаза 1).
-# Переиспользует проверенный build-android.yml апстрима, но в обход тяжёлого мультиплатформенного
-# пайплайна (ci.yml): без iOS/macOS/Windows, без TestFlight/Google Play/VirusTotal и без завязки
-# на общий `test`. APK подписывается нашим ключом из секретов и кладётся как артефакт прогона.
+# «Стриж» — сборка Android APK (Фаза 1), БЕЗ секретов/ключа.
+# Собирает release-APK; без key.properties Gradle подписывает его DEBUG-ключом (build.gradle:120) —
+# такой APK НОРМАЛЬНО ставится сайдлоадом (для теста среди знакомых достаточно). Настоящий релиз-ключ
+# подключим позже перед широкой раздачей (тогда друзьям — переустановка один раз).
+# Самодостаточный job (не завязан на тяжёлый ci.yml: без iOS/Play/VirusTotal и без общего test).
 #
-# Запуск: вкладка Actions → «Strij APK» → Run workflow (ветка main).
-# Результат: артефакт `android-apk` → файл Strij-Android-universal.apk (и по ABI).
-#
-# Нужны секреты репозитория: ANDROID_SIGNING_KEY (keystore в base64),
-# ANDROID_SIGNING_STORE_PASSWORD, ANDROID_SIGNING_KEY_PASSWORD, ANDROID_SIGNING_KEY_ALIAS.
+# Запуск: Actions → «Strij APK» → Run workflow (ветка main).
+# Результат: артефакт `android-apk` → Strij-Android-universal.apk (и по ABI).
 name: Strij APK
 
 on:
@@ -18,14 +16,57 @@ on:
         type: string
         default: dev
 
+env:
+  CHANNEL: ${{ inputs.channel }}
+
 jobs:
   apk:
-    uses: ./.github/workflows/build-android.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
-    with:
-      release: true                 # подписать нашим ключом и выгрузить артефакт
-      channel: ${{ inputs.channel }}
-      targets: '["apk"]'            # только APK, без AAB (Google Play нам не нужен)
-      generated-code: false         # сгенерировать код в этом же прогоне (нет отдельного codegen-джоба)
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Set up the Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
+        with:
+          packages: platform-tools
+
+      - uses: ./.github/actions/setup-flutter
+        with:
+          platform: android-apk
+          generated-code: false
+
+      - name: Build (release APK, debug-signed — no secrets)
+        run: make android-apk-release
+
+      - name: Collect the APKs
+        run: |
+          mkdir out
+          ls -R build/app/outputs
+          apk=build/app/outputs/flutter-apk
+          cp $apk/*arm64-v8a*.apk out/Strij-Android-arm64.apk || echo "no arm64 apk"
+          cp $apk/*armeabi-v7a*.apk out/Strij-Android-arm7.apk || echo "no arm7 apk"
+          cp $apk/*x86_64*.apk out/Strij-Android-x86_64.apk || echo "no x64 apk"
+          cp $apk/app-release.apk out/Strij-Android-universal.apk || echo "no universal apk"
+
+      - name: Upload the artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-apk
+          path: out
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
