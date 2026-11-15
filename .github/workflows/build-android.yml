@@ -132,10 +132,10 @@ jobs:
           mkdir out
           ls -R build/app/outputs
           apk=build/app/outputs/flutter-apk
-          cp $apk/*arm64-v8a*.apk out/Hiddify-Android-arm64.apk || echo "no arm64 apk"
-          cp $apk/*armeabi-v7a*.apk out/Hiddify-Android-arm7.apk || echo "no arm7 apk"
-          cp $apk/*x86_64*.apk out/Hiddify-Android-x86_64.apk || echo "no x64 apk"
-          cp $apk/app-release.apk out/Hiddify-Android-universal.apk || echo "no universal apk"
+          cp $apk/*arm64-v8a*.apk out/Strij-Android-arm64.apk || echo "no arm64 apk"
+          cp $apk/*armeabi-v7a*.apk out/Strij-Android-arm7.apk || echo "no arm7 apk"
+          cp $apk/*x86_64*.apk out/Strij-Android-x86_64.apk || echo "no x64 apk"
+          cp $apk/app-release.apk out/Strij-Android-universal.apk || echo "no universal apk"
 
       - name: Collect the Google Play bundle
         if: matrix.target == 'aab'

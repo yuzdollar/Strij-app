@@ -171,3 +171,19 @@ We thank everyone who takes part in this project, here on GitHub and the many mo
 <p align=center>
 Made with <a target="_blank" href="https://contrib.rocks">Contrib.Rocks</a>
 </p>
+
+---
+
+## Based on Hiddify
+
+**Strij** («Стриж») is a rebranded fork of [Hiddify-app](https://github.com/hiddify/hiddify-app),
+licensed under the GNU General Public License v3.0 (GPLv3). Full credit to the Hiddify team.
+
+Changes in this fork:
+- App display name "Стриж" (Strij)
+- Application ID: `com.strij.vpn`
+- Added deep-link scheme `strij://` for subscription import from our Telegram bot
+- Lightweight Android-only signed-APK workflow (`.github/workflows/strij-apk.yml`)
+
+The source code of this fork is public, as required by GPLv3.
+Upstream: https://github.com/hiddify/hiddify-app

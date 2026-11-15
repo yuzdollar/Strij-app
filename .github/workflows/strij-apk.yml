@@ -1,0 +1,31 @@
+# «Стриж» — лёгкая сборка ТОЛЬКО подписанного Android APK (Фаза 1).
+# Переиспользует проверенный build-android.yml апстрима, но в обход тяжёлого мультиплатформенного
+# пайплайна (ci.yml): без iOS/macOS/Windows, без TestFlight/Google Play/VirusTotal и без завязки
+# на общий `test`. APK подписывается нашим ключом из секретов и кладётся как артефакт прогона.
+#
+# Запуск: вкладка Actions → «Strij APK» → Run workflow (ветка main).
+# Результат: артефакт `android-apk` → файл Strij-Android-universal.apk (и по ABI).
+#
+# Нужны секреты репозитория: ANDROID_SIGNING_KEY (keystore в base64),
+# ANDROID_SIGNING_STORE_PASSWORD, ANDROID_SIGNING_KEY_PASSWORD, ANDROID_SIGNING_KEY_ALIAS.
+name: Strij APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: dev или prod (ядро hiddify-core и main-файл). Для Фазы 1 — dev.
+        type: string
+        default: dev
+
+jobs:
+  apk:
+    uses: ./.github/workflows/build-android.yml
+    secrets: inherit
+    permissions:
+      contents: read
+    with:
+      release: true                 # подписать нашим ключом и выгрузить артефакт
+      channel: ${{ inputs.channel }}
+      targets: '["apk"]'            # только APK, без AAB (Google Play нам не нужен)
+      generated-code: false         # сгенерировать код в этом же прогоне (нет отдельного codegen-джоба)
