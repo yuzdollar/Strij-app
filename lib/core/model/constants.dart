@@ -9,11 +9,11 @@ abstract class Constants {
   static const licenseUrl = "https://github.com/hiddify/hiddify-next?tab=License-1-ov-file#readme";
   static const githubReleasesApiUrl = "https://api.github.com/repos/hiddify/hiddify-app/releases";
   static const githubLatestReleaseUrl = "https://github.com/hiddify/hiddify-app/releases/latest";
-  static const telegramChannelUrl = "https://t.me/hiddify";
-  static const telegramChannelHandle = "@hiddify";
+  static const telegramChannelUrl = "https://t.me/strijvpn";
+  static const telegramChannelHandle = "@strijvpn";
 
   /// Opens the channel in the Telegram app; [telegramChannelUrl] when the app is not there.
-  static const telegramChannelAppUrl = "tg://resolve?domain=hiddify";
+  static const telegramChannelAppUrl = "tg://resolve?domain=strijvpn";
   static const bugReportEmail = "bug@hiddify.com";
 
   /// The bot that turns a report into an issue; the app starts it with the device's details
@@ -21,8 +21,8 @@ abstract class Constants {
   static const bugReportTelegramBot = "hiddify_issues_bot";
   static const bugReportTelegramName = "@$bugReportTelegramBot";
   static const bugReportGithubIssueUrl = "https://github.com/hiddify/hiddify-app/issues/new";
-  static const privacyPolicyUrl = "https://hiddify.com/privacy-policy/";
-  static const termsAndConditionsUrl = "https://hiddify.com/terms/";
+  static const privacyPolicyUrl = "https://telegra.ph/Politika-konfidencialnosti-Strizh-VPN-11-05";
+  static const termsAndConditionsUrl = "https://telegra.ph/Polzovatelskoe-soglashenie-Strizh-VPN-11-05";
   static const cfWarpPrivacyPolicy = "https://www.cloudflare.com/application/privacypolicy/";
   static const cfWarpTermsOfService = "https://www.cloudflare.com/application/terms/";
 }
