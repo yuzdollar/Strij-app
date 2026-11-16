@@ -62,11 +62,31 @@ jobs:
           cp $apk/*x86_64*.apk out/Strij-Android-x86_64.apk || echo "no x64 apk"
           cp $apk/app-release.apk out/Strij-Android-universal.apk || echo "no universal apk"
 
-      - name: Upload the artifact
+      # Per-ABI: each APK is its own small artifact (~63 MB) so the download is reliable,
+      # instead of one 383 MB zip of all four (the browser pane stalls on the big one).
+      - name: Upload arm64 APK
         uses: actions/upload-artifact@v6
         with:
-          name: android-apk
-          path: out
+          name: Strij-arm64
+          path: out/Strij-Android-arm64.apk
           retention-days: 7
           compression-level: 0
           if-no-files-found: error
+
+      - name: Upload arm7 APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: Strij-arm7
+          path: out/Strij-Android-arm7.apk
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Upload x86_64 APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: Strij-x86_64
+          path: out/Strij-Android-x86_64.apk
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: warn
