@@ -53,19 +53,38 @@ jobs:
       # other launchers ignore the adaptive vector icon and use these rasters, so the vector-only
       # rebrand still showed the old Hiddify "Hi". Rasterize the Strij bird into every density and
       # drop the old .webp. The adaptive icon (mipmap-anydpi-v26) is already the bird vector.
-      - name: Brand launcher raster icons
+      - name: Brand raster assets (launcher icon, splash, notification icon)
         run: |
           sudo apt-get update && sudo apt-get install -y librsvg2-bin
-          src=assets/images/strij_icon_square.svg
           res=android/app/src/main/res
+
+          # 1) Launcher icon (MIUI/Xiaomi use legacy raster, ignore the adaptive vector).
+          icon=assets/images/strij_icon_square.svg
           for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             d=${pair%:*}; px=${pair#*:}; dir="$res/mipmap-$d"
             [ -d "$dir" ] || continue
-            rsvg-convert -w "$px" -h "$px" "$src" -o "$dir/ic_launcher.png"
-            rsvg-convert -w "$px" -h "$px" "$src" -o "$dir/ic_launcher_round.png"
+            rsvg-convert -w "$px" -h "$px" "$icon" -o "$dir/ic_launcher.png"
+            rsvg-convert -w "$px" -h "$px" "$icon" -o "$dir/ic_launcher_round.png"
             rm -f "$dir/ic_launcher.webp" "$dir/ic_launcher_round.webp"
           done
-          ls -R "$res"/mipmap-*
+
+          # 2) Launch splash (Android < 12): the centered splash.png bitmap, bird instead of "Hi".
+          splash=assets/images/strij_splash.svg
+          for pair in mdpi:96 hdpi:144 xhdpi:192 xxhdpi:288 xxxhdpi:384; do
+            d=${pair%:*}; px=${pair#*:}; dir="$res/drawable-$d"
+            mkdir -p "$dir"
+            rsvg-convert -w "$px" -h "$px" "$splash" -o "$dir/splash.png"
+          done
+
+          # 3) Status-bar notification icon (ic_stat_logo): white bird silhouette, Android tints it.
+          stat=assets/images/strij_stat.svg
+          for pair in mdpi:24 hdpi:36 xhdpi:48 xxhdpi:72 xxxhdpi:96; do
+            d=${pair%:*}; px=${pair#*:}; dir="$res/drawable-$d"
+            mkdir -p "$dir"
+            rsvg-convert -w "$px" -h "$px" "$stat" -o "$dir/ic_stat_logo.png"
+          done
+
+          ls -R "$res"/mipmap-* "$res"/drawable-*
 
       - name: Build (release APK, debug-signed — no secrets)
         run: make android-apk-release
