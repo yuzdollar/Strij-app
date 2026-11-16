@@ -457,7 +457,7 @@ class _ConnectionButton extends HookWidget {
                                     // in steps, so it repaints only when the traffic changes a lot
                                     traffic: still || flowStill ? _stepped(target) : light.traffic,
                                     dark: theme.brightness == Brightness.dark,
-                                    drawLogo: !useImage,
+                                    drawLogo: false,
                                     logoOpacity: look == _Look.loading ? .38 : 1,
                                     pixelRatio: MediaQuery.devicePixelRatioOf(context),
                                     simple: still || flowStill,
@@ -481,7 +481,14 @@ class _ConnectionButton extends HookWidget {
                           hoverColor: Colors.black.withValues(alpha: .05),
                           highlightColor: Colors.black.withValues(alpha: .06),
                           splashColor: Colors.black.withValues(alpha: .08),
-                          child: useImage ? Padding(padding: const EdgeInsets.all(36), child: image.image()) : null,
+                          // Стриж по центру кнопки вместо рисованного «Hi»; тон = цвет состояния
+                          // (как раньше тонировался логотип). Анимации кнопки рисует пейнтер снизу.
+                          child: Padding(
+                            padding: const EdgeInsets.all(42),
+                            child: Assets.images.logo.svg(
+                              colorFilter: ColorFilter.mode(change.value.color, BlendMode.srcIn),
+                            ),
+                          ),
                         ),
                       ),
                       Positioned.fill(
