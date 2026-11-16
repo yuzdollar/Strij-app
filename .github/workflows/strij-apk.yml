@@ -49,6 +49,24 @@ jobs:
           platform: android-apk
           generated-code: false
 
+      # Brand the LEGACY raster launcher icons (mipmap-*/ic_launcher*.webp). MIUI/Xiaomi and some
+      # other launchers ignore the adaptive vector icon and use these rasters, so the vector-only
+      # rebrand still showed the old Hiddify "Hi". Rasterize the Strij bird into every density and
+      # drop the old .webp. The adaptive icon (mipmap-anydpi-v26) is already the bird vector.
+      - name: Brand launcher raster icons
+        run: |
+          sudo apt-get update && sudo apt-get install -y librsvg2-bin
+          src=assets/images/strij_icon_square.svg
+          res=android/app/src/main/res
+          for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            d=${pair%:*}; px=${pair#*:}; dir="$res/mipmap-$d"
+            [ -d "$dir" ] || continue
+            rsvg-convert -w "$px" -h "$px" "$src" -o "$dir/ic_launcher.png"
+            rsvg-convert -w "$px" -h "$px" "$src" -o "$dir/ic_launcher_round.png"
+            rm -f "$dir/ic_launcher.webp" "$dir/ic_launcher_round.webp"
+          done
+          ls -R "$res"/mipmap-*
+
       - name: Build (release APK, debug-signed — no secrets)
         run: make android-apk-release
 
