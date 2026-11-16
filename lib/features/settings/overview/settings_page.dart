@@ -34,7 +34,7 @@ class SettingsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
-    // Strij: продвинутые разделы видны только в скрытом «режиме разработчика» (7 тапов по версии).
+    // Strizh: продвинутые разделы видны только в скрытом «режиме разработчика» (7 тапов по версии).
     final devMode = ref.watch(Preferences.developerMode);
     // final scrollController = useScrollController();
 

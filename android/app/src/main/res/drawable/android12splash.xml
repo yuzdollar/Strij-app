@@ -1,4 +1,4 @@
-<!-- Strij: иконка системного сплэша Android 12+ (windowSplashScreenAnimatedIcon). Силуэт стрижа
+<!-- Strizh: иконка системного сплэша Android 12+ (windowSplashScreenAnimatedIcon). Силуэт стрижа
      вместо логотипа Hiddify «Hi». Центрирован и уменьшен под безопасную зону. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"

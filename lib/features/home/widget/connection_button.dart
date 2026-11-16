@@ -481,7 +481,7 @@ class _ConnectionButton extends HookWidget {
                           hoverColor: Colors.black.withValues(alpha: .05),
                           highlightColor: Colors.black.withValues(alpha: .06),
                           splashColor: Colors.black.withValues(alpha: .08),
-                          // Strij по центру кнопки вместо рисованного «Hi»; тон = цвет состояния
+                          // Strizh по центру кнопки вместо рисованного «Hi»; тон = цвет состояния
                           // (как раньше тонировался логотип). Анимации кнопки рисует пейнтер снизу.
                           child: Padding(
                             padding: const EdgeInsets.all(42),

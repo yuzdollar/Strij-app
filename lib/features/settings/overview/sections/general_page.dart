@@ -21,7 +21,7 @@ class GeneralPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
-    // Strij: технические тайлы видны только в скрытом «режиме разработчика».
+    // Strizh: технические тайлы видны только в скрытом «режиме разработчика».
     final devMode = ref.watch(Preferences.developerMode);
 
     return Scaffold(

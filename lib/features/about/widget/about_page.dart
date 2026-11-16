@@ -26,7 +26,7 @@ class AboutPage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final appInfo = ref.watch(appInfoProvider).requireValue;
     final appUpdate = ref.watch(appUpdateNotifierProvider);
-    // Strij: 7 тапов по строке версии включают/выключают скрытый «режим разработчика».
+    // Strizh: 7 тапов по строке версии включают/выключают скрытый «режим разработчика».
     final devTapCount = useState(0);
 
     ref.listen(appUpdateNotifierProvider, (_, next) async {

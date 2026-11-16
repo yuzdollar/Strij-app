@@ -31,7 +31,7 @@ enum Release {
 
   final String key;
 
-  /// Strij не проверяет обновления сам: апдейтер отключён на всех каналах (раздаём APK вручную,
+  /// Strizh не проверяет обновления сам: апдейтер отключён на всех каналах (раздаём APK вручную,
   /// апстрим-репозиторий hiddify-app к нам не относится). Раньше: `this == general`.
   bool get allowCustomUpdateChecker => false;
 

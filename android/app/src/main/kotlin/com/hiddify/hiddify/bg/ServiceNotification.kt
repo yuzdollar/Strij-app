@@ -114,7 +114,7 @@ class ServiceNotification(private val status: MutableLiveData<Status>, private v
     fun show(profileName: String, @StringRes contentTextId: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Application.notification.createNotificationChannel(
-                NotificationChannel(notificationChannel, "Strij VPN", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(notificationChannel, "Strizh VPN", NotificationManager.IMPORTANCE_LOW)
             )
         }
         synchronized(lock) {
