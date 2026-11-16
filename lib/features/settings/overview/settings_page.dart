@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
@@ -33,6 +34,8 @@ class SettingsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    // Strij: продвинутые разделы видны только в скрытом «режиме разработчика» (7 тапов по версии).
+    final devMode = ref.watch(Preferences.developerMode);
     // final scrollController = useScrollController();
 
     // useMemoized(
@@ -148,33 +151,37 @@ class SettingsPage extends HookConsumerWidget {
             icon: Icons.layers_rounded,
             namedLocation: context.namedLocation('general'),
           ),
-          if (ref.watch(hasAnyProfileProvider).value ?? false)
+          if (devMode && (ref.watch(hasAnyProfileProvider).value ?? false))
             SettingsSection(
               title: t.pages.settings.chain.title,
               icon: Icons.webhook_rounded,
               subtitle: Text(t.pages.settings.chain.subtitle),
               namedLocation: context.namedLocation('chainOptions'),
             ),
-          SettingsSection(
-            title: t.pages.settings.routing.title,
-            icon: Icons.route_rounded,
-            namedLocation: context.namedLocation('routingOptions'),
-          ),
-          SettingsSection(
-            title: t.pages.settings.dns.title,
-            icon: Icons.dns_rounded,
-            namedLocation: context.namedLocation('dnsOptions'),
-          ),
-          SettingsSection(
-            title: t.pages.settings.inbound.title,
-            icon: Icons.input_rounded,
-            namedLocation: context.namedLocation('inboundOptions'),
-          ),
-          SettingsSection(
-            title: t.pages.settings.tlsTricks.title,
-            icon: Icons.content_cut_rounded,
-            namedLocation: context.namedLocation('tlsTricks'),
-          ),
+          if (devMode)
+            SettingsSection(
+              title: t.pages.settings.routing.title,
+              icon: Icons.route_rounded,
+              namedLocation: context.namedLocation('routingOptions'),
+            ),
+          if (devMode)
+            SettingsSection(
+              title: t.pages.settings.dns.title,
+              icon: Icons.dns_rounded,
+              namedLocation: context.namedLocation('dnsOptions'),
+            ),
+          if (devMode)
+            SettingsSection(
+              title: t.pages.settings.inbound.title,
+              icon: Icons.input_rounded,
+              namedLocation: context.namedLocation('inboundOptions'),
+            ),
+          if (devMode)
+            SettingsSection(
+              title: t.pages.settings.tlsTricks.title,
+              icon: Icons.content_cut_rounded,
+              namedLocation: context.namedLocation('tlsTricks'),
+            ),
           if ((PlatformUtils.isIOS || PlatformUtils.isMacOS) &&
               ref.watch(hiddifyCoreServiceProvider).core.hasVpnProfile)
             Material(
@@ -187,11 +194,12 @@ class SettingsPage extends HookConsumerWidget {
               ),
             ),
           if (Breakpoint(context).isMobile()) ...[
-            SettingsSection(
-              title: t.pages.logs.title,
-              icon: Icons.description_rounded,
-              namedLocation: context.namedLocation('logs'),
-            ),
+            if (devMode)
+              SettingsSection(
+                title: t.pages.logs.title,
+                icon: Icons.description_rounded,
+                namedLocation: context.namedLocation('logs'),
+              ),
             SettingsSection(
               title: t.pages.about.title,
               icon: Icons.info_rounded,

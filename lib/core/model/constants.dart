@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:hiddify/utils/utils.dart';
 
 abstract class Constants {
-  static const appName = "Стриж";
-  static const githubUrl = "https://github.com/hiddify/hiddify-next";
+  static const appName = "Strij";
+  // GPLv3: ссылка на «соответствующий исходный код» этой сборки = наш форк.
+  static const githubUrl = "https://github.com/yuzdollar/Strij-app";
   static const licenseUrl = "https://github.com/hiddify/hiddify-next?tab=License-1-ov-file#readme";
   static const githubReleasesApiUrl = "https://api.github.com/repos/hiddify/hiddify-app/releases";
   static const githubLatestReleaseUrl = "https://github.com/hiddify/hiddify-app/releases/latest";

@@ -87,6 +87,11 @@ abstract class Preferences {
 
   static final silentStart = PreferencesNotifier.create<bool, bool>("silent_start", false);
 
+  // Strij: скрытый «режим разработчика». Включается 7 тапами по версии в «О программе». Пока выключен,
+  // продвинутые разделы настроек (Маршрутизация/DNS/Входящие/TLS/Цепочка/Логи и технические тайлы в
+  // «Общих») спрятаны — для друзей остаётся простой UI «нажал и подключился».
+  static final developerMode = PreferencesNotifier.create<bool, bool>("developer_mode", false);
+
   static final disableMemoryLimit = PreferencesNotifier.create<bool, bool>(
     "disable_memory_limit",
     // only iOS needs the limit (the Network Extension is killed above its memory cap); elsewhere

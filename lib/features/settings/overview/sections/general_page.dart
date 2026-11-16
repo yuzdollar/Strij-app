@@ -21,6 +21,8 @@ class GeneralPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
+    // Strij: технические тайлы видны только в скрытом «режиме разработчика».
+    final devMode = ref.watch(Preferences.developerMode);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.pages.settings.general.title)),
@@ -85,7 +87,7 @@ class GeneralPage extends HookConsumerWidget {
           ],
           if (PlatformUtils.isAndroid) const BatteryOptimizationWidget(),
           // iOS ends a VPN that outgrows its memory budget: the limit is always on there
-          if (!PlatformUtils.isIOS)
+          if (devMode && !PlatformUtils.isIOS)
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.memoryLimit),
               subtitle: Text(t.pages.settings.general.memoryLimitMsg),
@@ -96,14 +98,16 @@ class GeneralPage extends HookConsumerWidget {
           // Debug mode and log level moved to the Logs page. Both decide how
           // much is recorded, which is only meaningful next to the logs
           // themselves — and next to the filters that decide what is shown.
-          ValuePreferenceWidget(
-            value: ref.watch(ConfigOptions.connectionTestUrl),
-            preferences: ref.watch(ConfigOptions.connectionTestUrl.notifier),
-            title: t.pages.settings.general.connectionTestUrl,
-            icon: Icons.link_rounded,
-          ),
-          ListTile(
-            title: Text(t.pages.settings.general.urlTestInterval),
+          if (devMode)
+            ValuePreferenceWidget(
+              value: ref.watch(ConfigOptions.connectionTestUrl),
+              preferences: ref.watch(ConfigOptions.connectionTestUrl.notifier),
+              title: t.pages.settings.general.connectionTestUrl,
+              icon: Icons.link_rounded,
+            ),
+          if (devMode)
+            ListTile(
+              title: Text(t.pages.settings.general.urlTestInterval),
             subtitle: Text(ref.watch(ConfigOptions.urlTestInterval).toApproximateTime(isRelativeToNow: false)),
             leading: const Icon(Icons.timer_rounded),
             onTap: () async => await ref
@@ -123,8 +127,9 @@ class GeneralPage extends HookConsumerWidget {
                 }),
           ),
           // how a speed test of the proxy list runs: download or upload, how much, how many proxies
-          ListTile(
-            title: Text(t.pages.settings.general.speedTest),
+          if (devMode)
+            ListTile(
+              title: Text(t.pages.settings.general.speedTest),
             subtitle: Text(
               [
                 switch (ref.watch(ConfigOptions.speedTestDirection)) {
@@ -142,15 +147,16 @@ class GeneralPage extends HookConsumerWidget {
             leading: const Icon(Icons.speed_rounded),
             onTap: () => ref.read(dialogNotifierProvider.notifier).showSpeedTest(start: false),
           ),
-          ValuePreferenceWidget(
-            value: ref.watch(ConfigOptions.clashApiPort),
-            preferences: ref.watch(ConfigOptions.clashApiPort.notifier),
-            title: t.pages.settings.general.clashApiPort,
-            icon: Icons.api_rounded,
-            validateInput: isPort,
-            digitsOnly: true,
-            inputToValue: int.tryParse,
-          ),
+          if (devMode)
+            ValuePreferenceWidget(
+              value: ref.watch(ConfigOptions.clashApiPort),
+              preferences: ref.watch(ConfigOptions.clashApiPort.notifier),
+              title: t.pages.settings.general.clashApiPort,
+              icon: Icons.api_rounded,
+              validateInput: isPort,
+              digitsOnly: true,
+              inputToValue: int.tryParse,
+            ),
           if (Platform.isMacOS || Platform.isIOS || Platform.isWindows)
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.useSystemTlsEngine),

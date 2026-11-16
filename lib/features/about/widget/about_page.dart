@@ -1,6 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/directories/directories_provider.dart';
@@ -25,6 +26,8 @@ class AboutPage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final appInfo = ref.watch(appInfoProvider).requireValue;
     final appUpdate = ref.watch(appUpdateNotifierProvider);
+    // Strij: 7 тапов по строке версии включают/выключают скрытый «режим разработчика».
+    final devTapCount = useState(0);
 
     ref.listen(appUpdateNotifierProvider, (_, next) async {
       if (!context.mounted) return;
@@ -105,7 +108,24 @@ class AboutPage extends HookConsumerWidget {
                     children: [
                       Text(t.common.appTitle, style: Theme.of(context).textTheme.titleLarge),
                       const Gap(4),
-                      Text("${t.common.version} ${appInfo.presentVersion}"),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          final n = devTapCount.value + 1;
+                          devTapCount.value = n;
+                          if (n >= 7) {
+                            devTapCount.value = 0;
+                            final enabled = !ref.read(Preferences.developerMode);
+                            ref.read(Preferences.developerMode.notifier).update(enabled);
+                            ref
+                                .read(inAppNotificationControllerProvider)
+                                .showSuccessToast(
+                                  enabled ? "Developer mode enabled" : "Developer mode disabled",
+                                );
+                          }
+                        },
+                        child: Text("${t.common.version} ${appInfo.presentVersion}"),
+                      ),
                     ],
                   ),
                 ],
