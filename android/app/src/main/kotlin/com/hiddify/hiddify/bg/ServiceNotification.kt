@@ -126,7 +126,7 @@ class ServiceNotification(private val status: MutableLiveData<Status>, private v
     private fun render(profile: String, text: String, header: String, foreground: Boolean = false) {
         synchronized(lock) {
             if (!active) return
-            val next = Triple(profile.ifBlank { "Hiddify" }, text, header)
+            val next = Triple(profile.ifBlank { "Strizh" }, text, header)
             if (!foreground && next == shown) return
             shown = next
             val built = notificationBuilder

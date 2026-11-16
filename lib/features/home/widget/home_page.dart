@@ -37,15 +37,8 @@ class HomePage extends HookConsumerWidget {
           children: [
             Assets.images.logo.svg(height: 24),
             const Gap(8),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: t.common.appTitle),
-                  const TextSpan(text: " "),
-                  const WidgetSpan(child: AppVersionLabel(), alignment: PlaceholderAlignment.middle),
-                ],
-              ),
-            ),
+            // Strizh: только название, без бейджа версии «5.9.8 dev» (выглядел как бета).
+            Text(t.common.appTitle),
           ],
         ),
         actions: [
