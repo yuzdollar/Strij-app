@@ -122,7 +122,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(11),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer.withOpacity(0.5),
+                    color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(_error!, style: TextStyle(color: theme.colorScheme.onErrorContainer, fontSize: 13)),
