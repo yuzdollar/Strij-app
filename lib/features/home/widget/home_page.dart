@@ -8,6 +8,7 @@ import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/home/widget/local_proxy_hint.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
+import 'package:hiddify/features/strizh/strizh_onboarding.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -129,36 +130,40 @@ class HomePage extends HookConsumerWidget {
                       slivers: [
                         // switch (activeProfile) {
                         // AsyncData(value: final profile?) =>
-                        MultiSliver(
-                          children: [
-                            // const Gap(100),
-                            switch (activeProfile) {
-                              AsyncData(value: final profile?) => ProfileTile(
+                        // Strizh: нет активного профиля -> экран входа (free/premium);
+                        // есть -> стандартная плитка профиля + кнопка подключения.
+                        switch (activeProfile) {
+                          AsyncData(value: final profile?) => MultiSliver(
+                            children: [
+                              ProfileTile(
                                 profile: profile,
                                 isMain: true,
                                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               ),
-                              _ => const Text(""),
-                            },
-                            const SliverFillRemaining(
-                              hasScrollBody: false,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [ConnectionButton(), ActiveProxyDelayIndicator()],
+                              const SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [ConnectionButton(), ActiveProxyDelayIndicator()],
+                                      ),
                                     ),
-                                  ),
-                                  ActiveProxyFooter(),
-                                  Gap(32),
-                                ],
+                                    ActiveProxyFooter(),
+                                    Gap(32),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                          _ => const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: StrizhOnboarding(),
+                          ),
+                        },
                         // AsyncData() => switch (hasAnyProfile) {
                         //     AsyncData(value: true) => const EmptyActiveProfileHomeBody(),
                         //     _ => const EmptyProfilesHomeBody(),
