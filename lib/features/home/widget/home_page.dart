@@ -4,16 +4,12 @@ import 'package:gap/gap.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
-import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/home/widget/local_proxy_hint.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/profile/widget/profile_tile.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
+import 'package:hiddify/features/strizh/strizh_connected.dart';
 import 'package:hiddify/features/strizh/strizh_onboarding.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -133,31 +129,12 @@ class HomePage extends HookConsumerWidget {
                         // Strizh: нет активного профиля -> экран входа (free/premium);
                         // есть -> стандартная плитка профиля + кнопка подключения.
                         switch (activeProfile) {
-                          AsyncData(value: final profile?) => MultiSliver(
-                            children: [
-                              ProfileTile(
-                                profile: profile,
-                                isMain: true,
-                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              ),
-                              const SliverFillRemaining(
-                                hasScrollBody: false,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [ConnectionButton(), ActiveProxyDelayIndicator()],
-                                      ),
-                                    ),
-                                    ActiveProxyFooter(),
-                                    Gap(32),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          // Strizh: активный профиль -> экран «подключено» по макету
+                          // (кнопка-стриж + пинг + локация + трафик + Premium);
+                          // нет профиля -> экран входа.
+                          AsyncData(value: final profile?) => SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: StrizhConnectedBody(profile: profile),
                           ),
                           _ => const SliverFillRemaining(
                             hasScrollBody: false,
