@@ -3,13 +3,15 @@ import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/strizh/strizh_api.dart';
+import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum _Step { choose, email, code }
 
-/// Экран «вошёл — подключился» для Strizh. Показывается, когда активного профиля нет.
-/// Free: одна кнопка. Premium: email -> код. После успеха подставляет подписку /sub/{sub_id}
-/// как активный профиль и подключает.
+/// Экран «вошёл — подключился» для Strizh (дизайн по макету). Показывается, когда активного профиля нет.
+/// Free: одна кнопка (hwid → /free/connect). Premium: email → код (/auth/verify → /subscriptions/config).
+/// После успеха подставляет подписку /sub/{sub_id} как активный профиль и подключает.
 class StrizhOnboarding extends ConsumerStatefulWidget {
   const StrizhOnboarding({super.key});
 
@@ -64,10 +66,9 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
     if (ref.read(addProfileNotifierProvider).hasError) {
       throw StrizhException('Не удалось применить подписку. Попробуй ещё раз.');
     }
-    // авто-connect после добавления активного профиля
     try {
       await ref.read(connectionNotifierProvider.notifier).toggleConnection();
-    } catch (_) {/* если авто-коннект не удался — покажется большая кнопка подключения */}
+    } catch (_) {/* не удалось авто-коннект — покажется большая кнопка подключения */}
   }
 
   Future<void> _free() => _run(() async {
@@ -96,47 +97,72 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
         await _activate(subId, 'Strizh VPN');
       });
 
+  Future<void> _openSite() async {
+    try {
+      await launchUrl(Uri.parse('https://strizhvpn.com/buy'), mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
       child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.flight_takeoff_rounded, size: 56, color: theme.colorScheme.primary),
-              const SizedBox(height: 14),
-              Text('Strizh VPN', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              Text(
-                'Войди и подключайся — ключи не нужны',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 26),
-              if (_error != null) ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(11),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(_error!, style: TextStyle(color: theme.colorScheme.onErrorContainer, fontSize: 13)),
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Assets.images.logo.svg(height: 76),
+                const SizedBox(height: 18),
+                Text(
+                  'Strizh',
+                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: .5),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 6),
+                Text(
+                  'Интернет без границ',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 30),
+                if (_error != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(11),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(_error!, style: TextStyle(color: theme.colorScheme.onErrorContainer, fontSize: 13)),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (_loading)
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: CircularProgressIndicator())
+                else
+                  ..._body(theme),
               ],
-              if (_loading) const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator()),
-              if (!_loading) ..._body(theme),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  ButtonStyle get _filledStyle => FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15.5),
+      );
+
+  ButtonStyle get _outlinedStyle => OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15.5),
+      );
 
   List<Widget> _body(ThemeData theme) {
     switch (_step) {
@@ -144,25 +170,25 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
         return [
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: _free,
-              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15)),
-              child: const Text('Подключиться бесплатно'),
-            ),
+            child: FilledButton(onPressed: _free, style: _filledStyle, child: const Text('Начать бесплатно')),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => setState(() => _step = _Step.email),
-              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15)),
-              child: const Text('У меня Premium — войти по email'),
+              style: _outlinedStyle,
+              child: const Text('Войти или зарегистрироваться'),
             ),
           ),
-          const SizedBox(height: 12),
-          Text('Free — 30 минут в день, без карты и регистрации',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          const SizedBox(height: 18),
+          TextButton(
+            onPressed: _openSite,
+            child: Text(
+              'Аккаунт и тарифы — на сайте',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
         ];
       case _Step.email:
         return [
@@ -170,23 +196,26 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
             controller: _emailCtrl,
             keyboardType: TextInputType.emailAddress,
             autofocus: true,
-            decoration: const InputDecoration(labelText: 'Email', hintText: 'you@example.com', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              hintText: 'you@example.com',
+              border: OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: _sendCode,
-              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15)),
-              child: const Text('Отправить код'),
-            ),
+            child: FilledButton(onPressed: _sendCode, style: _filledStyle, child: const Text('Получить код')),
           ),
           TextButton(onPressed: () => setState(() => _step = _Step.choose), child: const Text('Назад')),
         ];
       case _Step.code:
         return [
-          Text('Код отправлен на ${_emailCtrl.text.trim()}',
-              textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
+          Text(
+            'Код отправлен на ${_emailCtrl.text.trim()}',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall,
+          ),
           const SizedBox(height: 12),
           TextField(
             controller: _codeCtrl,
@@ -199,11 +228,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: _verify,
-              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15)),
-              child: const Text('Войти и подключиться'),
-            ),
+            child: FilledButton(onPressed: _verify, style: _filledStyle, child: const Text('Войти и подключиться')),
           ),
           TextButton(onPressed: () => setState(() => _step = _Step.email), child: const Text('Изменить email')),
         ];
