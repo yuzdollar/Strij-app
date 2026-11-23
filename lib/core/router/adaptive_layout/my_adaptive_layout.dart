@@ -124,16 +124,10 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                       Expanded(child: Semantics(container: true, child: navigationShell)),
                     ],
                   ),
-            bottomNavigationBar: isMobileBreakpoint
-                ? FocusScope(
-                    node: navScopeNode,
-                    child: NavigationBar(
-                      selectedIndex: navigationShell.currentIndex <= 1 ? navigationShell.currentIndex : 0,
-                      destinations: _navDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
-                      onDestinationSelected: (index) => _onTap(context, index),
-                    ),
-                  )
-                : null,
+            // Strizh: на мобильном нижней навигации (Home/Settings) НЕТ — по макету.
+            // В настройки ведёт шестерёнка в AppBar главного экрана (goNamed('settings')),
+            // назад — стрелка в AppBar настроек. Десктоп оставляет боковой NavigationRail.
+            // (bottomNavigationBar по умолчанию null — не задаём.)
           ),
         ),
       ),
@@ -153,8 +147,7 @@ class MyAdaptiveLayout extends HookConsumerWidget {
     if (!isMobileBreakpoint) ShellRouteAction(Icons.info_rounded, t.pages.about.title),
   ];
 
-  List<NavigationDestination> _navDests(List<ShellRouteAction> actions) =>
-      actions.map((e) => NavigationDestination(icon: Icon(e.icon), label: e.title)).toList();
+  // Strizh: _navDests (мобильный NavigationBar) удалён — нижней навигации на мобильном больше нет.
   List<NavigationRailDestination> _navRailDests(List<ShellRouteAction> actions) =>
       actions.map((e) => NavigationRailDestination(icon: Icon(e.icon), label: Text(e.title))).toList();
 }

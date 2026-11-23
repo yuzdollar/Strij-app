@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
-import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
-import 'package:hiddify/core/widget/adaptive_icon.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/proxy/keep_top/keep_top_widgets.dart';
 import 'package:hiddify/features/proxy/model/proxy_entity.dart';
@@ -24,7 +22,6 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
     final t = ref.watch(translationsProvider).requireValue;
 
     final proxies = ref.watch(proxiesOverviewNotifierProvider);
-    final sortBy = ref.watch(proxiesSortNotifierProvider);
     // the proxies keep top left at rest, under the list: shown at first, then folded or not as the user left them
     final showResting = ref.watch(Preferences.showSleepingProxies);
 
@@ -33,70 +30,15 @@ class ProxiesOverviewPage extends HookConsumerWidget with PresLogger {
     // );
 
     return Scaffold(
+      // Strizh: по макету — чистый список локаций. Без «Signal style», без сортировки,
+      // без keep-top и без кнопки спид-теста. Осталась только «молния» — переснять пинг.
       appBar: AppBar(
         title: Text(t.pages.proxies.title),
-        actions: [
-          const KeepTopAction(),
-          PopupMenuButton<ProxiesSort>(
-            initialValue: sortBy,
-            onSelected: ref.read(proxiesSortNotifierProvider.notifier).update,
-            icon: const Icon(FluentIcons.arrow_sort_24_regular),
-            tooltip: t.pages.proxies.sort,
-            itemBuilder: (context) {
-              return [...ProxiesSort.values.map((e) => PopupMenuItem(value: e, child: Text(e.present(t))))];
-            },
-          ),
-          // "Signal style" (off by default) shows pings as the signal instead of numbers
-          PopupMenuButton<bool>(
-            onSelected: (_) => ref.read(proxyPingStyleNotifierProvider.notifier).toggle(),
-            icon: Icon(AdaptiveIcon(context).more),
-            tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-            itemBuilder: (context) => [
-              // a null value would close the menu as cancelled
-              PopupMenuItem(
-                value: true,
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: ref.read(proxyPingStyleNotifierProvider) == ProxyPingStyle.signal,
-                      // a tap on the box itself does what a tap on the item does
-                      onChanged: (_) => Navigator.pop(context, true),
-                    ),
-                    const Gap(8),
-                    Text(t.pages.proxies.signalStyle),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Gap(8),
-        ],
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // the speed of the proxies listed: what it tests and the data it takes show first, and
-          // it starts from there
-          if (proxies.valueOrNull case final group?)
-            FloatingActionButton.small(
-              heroTag: 'upload-test',
-              onPressed: () async {
-                final count = group.items.where((e) => !e.isGroup && !e.resting).length;
-                if (await ref.read(dialogNotifierProvider.notifier).showSpeedTest(count: count)) {
-                  await ref.read(proxiesOverviewNotifierProvider.notifier).speedTestAll();
-                }
-              },
-              tooltip: t.pages.proxies.speedTest.title,
-              child: const Icon(Icons.speed_rounded, size: 26),
-            ),
-          const Gap(12),
-          FloatingActionButton(
-            onPressed: () async => await ref.read(proxiesOverviewNotifierProvider.notifier).urlTest("select"),
-            tooltip: t.pages.proxies.testDelay,
-            child: const Icon(FluentIcons.flash_24_filled),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async => await ref.read(proxiesOverviewNotifierProvider.notifier).urlTest("select"),
+        tooltip: t.pages.proxies.testDelay,
+        child: const Icon(FluentIcons.flash_24_filled),
       ),
       body: proxies.when(
         data: (group) => group != null

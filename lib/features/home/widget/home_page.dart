@@ -1,10 +1,9 @@
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
-import 'package:hiddify/features/home/widget/local_proxy_hint.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/strizh/strizh_connected.dart';
 import 'package:hiddify/features/strizh/strizh_onboarding.dart';
@@ -39,25 +38,12 @@ class HomePage extends HookConsumerWidget {
           ],
         ),
         actions: [
-          // IconButton(
-          //     onPressed: () => const QuickSettingsRoute().push(context),
-          //     icon: const Icon(FluentIcons.options_24_filled),
-          //     material: (context, platform) => MaterialIconButtonData(
-          //           tooltip: t.config.quickSettings,
-          //         )),
-          // IconButton(
-          //     onPressed: () => const AddProfileRoute().push(context),
-          //     icon: const Icon(FluentIcons.add_circle_24_filled),
-          //     material: (context, platform) => MaterialIconButtonData(
-          //           tooltip: t.profile.add.buttonText,
-          //         )),
-          Semantics(
-            key: const ValueKey("profile_add_button"),
-            label: t.pages.profiles.add,
-            child: IconButton(
-              icon: Icon(Icons.add_rounded, color: theme.colorScheme.primary),
-              onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
-            ),
+          // Strizh: «+» (импорт ключа/профиля) убран — подписку заводит вход в приложении.
+          // В AppBar только шестерёнка настроек (по макету).
+          IconButton(
+            tooltip: t.pages.settings.title,
+            icon: Icon(Icons.settings_rounded, color: theme.colorScheme.onSurfaceVariant),
+            onPressed: () => context.goNamed('settings'),
           ),
           const Gap(8),
         ],
@@ -153,47 +139,7 @@ class HomePage extends HookConsumerWidget {
                   ),
                 ),
               ),
-              if (ref.watch(hasAnyProfileProvider).value ?? false)
-                Positioned(
-                  right: 0,
-                  left: 0,
-                  bottom: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    // tabs of either height stand on the bottom edge
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // in proxy mode, a smaller tab beside this one on how to point apps at the proxy
-                      const Flexible(child: LocalProxyHint()),
-                      Material(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                        child: InkWell(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
-                          ),
-                          onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showQuickSettings(),
-                          child: Container(
-                            height: 32,
-                            padding: const EdgeInsetsDirectional.only(start: 16, end: 8),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(t.pages.home.quickSettings),
-                                const Gap(4),
-                                const Icon(Icons.arrow_drop_up_rounded, size: 16),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              // Strizh: «Quick settings» и подсказка локального прокси убраны (по макету).
             ],
           ),
         ],

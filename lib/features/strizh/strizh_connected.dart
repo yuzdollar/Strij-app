@@ -43,10 +43,12 @@ class StrizhConnectedBody extends ConsumerWidget {
           const Spacer(flex: 3),
           _LocationChip(name: locationName, onTap: () => context.goNamed('proxies')),
           const Gap(14),
-          if (subInfo != null)
-            _TrafficBar(subInfo)
+          // Free — плашка «Бесплатно · 2 Мбит/с» (по макету, без «Unlimited»).
+          // Premium — реальная полоса трафика подписки.
+          if (isFree)
+            _FreeQuota(theme: theme)
           else
-            _FreePill(theme: theme),
+            _TrafficBar(subInfo),
           const Gap(18),
           if (isFree) _PremiumButton(theme: theme),
         ],
@@ -117,54 +119,50 @@ class _TrafficBar extends StatelessWidget {
   }
 }
 
-/// Бесплатный тариф: нейтральная плашка (тайм-квота free — отдельная фича heartbeat, позже).
-class _FreePill extends StatelessWidget {
-  const _FreePill({required this.theme});
+/// Бесплатный тариф: полоса + «Бесплатно · 2 Мбит/с» (по макету).
+/// Тайм-квота «Сегодня осталось 28:30» — отдельная фича heartbeat на бэкенде, добавим позже.
+class _FreeQuota extends StatelessWidget {
+  const _FreeQuota({required this.theme});
 
   final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.card_giftcard_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
-          const Gap(8),
-          Text(
-            'Бесплатный доступ',
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: 1,
+            minHeight: 6,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
           ),
-        ],
-      ),
+        ),
+        const Gap(8),
+        Center(
+          child: Text(
+            'Бесплатно · 2 Мбит/с',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+        ),
+      ],
     );
   }
 }
 
-/// Кнопка «Перейти на Premium» — открывает тарифы на сайте.
+/// Кнопка «Перейти на Premium» — открывает модалку Premium (по макету), а не сразу сайт.
 class _PremiumButton extends StatelessWidget {
   const _PremiumButton({required this.theme});
 
   final ThemeData theme;
-
-  Future<void> _open() async {
-    try {
-      await launchUrl(Uri.parse('https://strizhvpn.com/buy'), mode: LaunchMode.externalApplication);
-    } catch (_) {}
-  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
-        onPressed: _open,
+        onPressed: () => showStrizhPremiumSheet(context),
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -175,4 +173,95 @@ class _PremiumButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Модалка Premium (по макету): молния, «Полная скорость, без лимитов»,
+/// «Локации по всему миру», кнопка «Выбрать тариф» → сайт strizhvpn.com.
+Future<void> showStrizhPremiumSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (context) {
+      final theme = Theme.of(context);
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Premium',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const Gap(8),
+              Container(
+                width: 68,
+                height: 68,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.bolt_rounded, size: 34, color: theme.colorScheme.primary),
+              ),
+              const Gap(18),
+              Text(
+                'Полная скорость, без лимитов',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const Gap(8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.public_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                  const Gap(6),
+                  Text(
+                    'Локации по всему миру',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+              const Gap(24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    try {
+                      await launchUrl(
+                        Uri.parse('https://strizhvpn.com/buy'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } catch (_) {}
+                  },
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  ),
+                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                  label: const Text('Выбрать тариф'),
+                ),
+              ),
+              const Gap(10),
+              Text(
+                'Откроется сайт Strizh',
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
