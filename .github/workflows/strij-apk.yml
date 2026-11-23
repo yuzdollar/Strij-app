@@ -5,7 +5,7 @@
 # Самодостаточный job (не завязан на тяжёлый ci.yml: без iOS/Play/VirusTotal и без общего test).
 #
 # Запуск: Actions → «Strij APK» → Run workflow (ветка main).
-# Результат: артефакт `android-apk` → Strij-Android-universal.apk (и по ABI).
+# Результат: ОДИН артефакт `Strij-universal` → Strij-Android-universal.apk (универсальный, arm64+arm7).
 name: Strij APK
 
 on:
@@ -86,44 +86,33 @@ jobs:
 
           ls -R "$res"/mipmap-* "$res"/drawable-*
 
-      - name: Build (release APK, debug-signed — no secrets)
-        run: make android-apk-release
+      # ОДИН универсальный («полный») APK — arm64 + armeabi-v7a в одном файле, ставится на любой
+      # Android-телефон. x86_64 (только эмулятор) намеренно НЕ включаем, чтобы файл был меньше и
+      # скачивание артефакта было надёжным. Без --split-per-abi flutter собирает единый fat-APK
+      # app-release.apk. Debug-подпись (нет key.properties) — сайдлоад ставится нормально.
+      - name: Build universal release APK (debug-signed — no secrets)
+        run: |
+          if [ "$CHANNEL" = "prod" ]; then TGT=lib/main_prod.dart; else TGT=lib/main.dart; fi
+          flutter build apk --release \
+            --target "$TGT" \
+            --target-platform android-arm,android-arm64 \
+            --dart-define sentry_dsn= \
+            --dart-define commit="$(git rev-parse --short=7 HEAD)"
+          ls -lh build/app/outputs/flutter-apk/
 
-      - name: Collect the APKs
+      - name: Collect the universal APK
         run: |
           mkdir out
-          ls -R build/app/outputs
-          apk=build/app/outputs/flutter-apk
-          cp $apk/*arm64-v8a*.apk out/Strij-Android-arm64.apk || echo "no arm64 apk"
-          cp $apk/*armeabi-v7a*.apk out/Strij-Android-arm7.apk || echo "no arm7 apk"
-          cp $apk/*x86_64*.apk out/Strij-Android-x86_64.apk || echo "no x64 apk"
-          cp $apk/app-release.apk out/Strij-Android-universal.apk || echo "no universal apk"
+          cp build/app/outputs/flutter-apk/app-release.apk out/Strij-Android-universal.apk
+          ls -lh out/
 
-      # Per-ABI: each APK is its own small artifact (~63 MB) so the download is reliable,
-      # instead of one 383 MB zip of all four (the browser pane stalls on the big one).
-      - name: Upload arm64 APK
+      # Один артефакт = один .apk (~110 МБ). compression-level 0 (APK уже сжат), чтобы распаковка
+      # после скачивания была мгновенной.
+      - name: Upload universal APK
         uses: actions/upload-artifact@v6
         with:
-          name: Strij-arm64
-          path: out/Strij-Android-arm64.apk
+          name: Strij-universal
+          path: out/Strij-Android-universal.apk
           retention-days: 7
           compression-level: 0
           if-no-files-found: error
-
-      - name: Upload arm7 APK
-        uses: actions/upload-artifact@v6
-        with:
-          name: Strij-arm7
-          path: out/Strij-Android-arm7.apk
-          retention-days: 7
-          compression-level: 0
-          if-no-files-found: error
-
-      - name: Upload x86_64 APK
-        uses: actions/upload-artifact@v6
-        with:
-          name: Strij-x86_64
-          path: out/Strij-Android-x86_64.apk
-          retention-days: 7
-          compression-level: 0
-          if-no-files-found: warn
