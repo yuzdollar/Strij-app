@@ -8,8 +8,15 @@ class AppTheme {
   final AppThemeMode mode;
   final String fontFamily;
 
+  /// Strizh brand accent — синий как на макете. Фиксированный бренд-цвет,
+  /// динамическую палитру устройства (из обоев) НЕ используем, чтобы бренд был одинаков везде.
+  static const Color brandBlue = Color(0xFF2F6BFF);
+
+  /// Плоский тёмный фон как на макете (почти чёрный с лёгким синим подтоном).
+  static const Color darkBg = Color(0xFF0C0F16);
+
   ThemeData lightTheme(ColorScheme? lightColorScheme) {
-    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0));
+    final ColorScheme scheme = ColorScheme.fromSeed(seedColor: brandBlue);
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -19,12 +26,11 @@ class AppTheme {
   }
 
   ThemeData darkTheme(ColorScheme? darkColorScheme) {
-    final ColorScheme scheme =
-        darkColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0), brightness: Brightness.dark);
+    final ColorScheme scheme = ColorScheme.fromSeed(seedColor: brandBlue, brightness: Brightness.dark);
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : scheme.surface,
+      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : darkBg,
       fontFamily: fontFamily,
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
     );

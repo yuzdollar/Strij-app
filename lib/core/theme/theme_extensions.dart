@@ -6,9 +6,10 @@ class ConnectionButtonTheme extends ThemeExtension<ConnectionButtonTheme> {
   final Color? idleColor;
   final Color? connectedColor;
 
+  // Strizh: синий бренд-акцент (кольцо-подключение). idle — приглушённый серо-синий, on — бренд-синий.
   static const ConnectionButtonTheme light = ConnectionButtonTheme(
-    idleColor: Color(0xFF4a4d8b),
-    connectedColor: Color(0xFF44a334),
+    idleColor: Color(0xFF3A4252),
+    connectedColor: Color(0xFF2F6BFF),
   );
 
   @override

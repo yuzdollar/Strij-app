@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/theme/app_theme.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/strizh/strizh_connected.dart';
 import 'package:hiddify/features/strizh/strizh_onboarding.dart';
@@ -31,7 +32,10 @@ class HomePage extends HookConsumerWidget {
         //     : null,
         title: Row(
           children: [
-            Assets.images.logo.svg(height: 24),
+            Assets.images.logo.svg(
+              height: 24,
+              colorFilter: const ColorFilter.mode(AppTheme.brandBlue, BlendMode.srcIn),
+            ),
             const Gap(8),
             // Strizh: только название, без бейджа версии «5.9.8 dev» (выглядел как бета).
             Text(t.common.appTitle),
@@ -53,47 +57,8 @@ class HomePage extends HookConsumerWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          RepaintBoundary(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                // A sky behind the connect button, as at an eclipse: in dark mode a touch lighter round
-                // the button, fading to the theme's own dark; in light mode brightest there, a touch
-                // darker towards the edges. Both barely there, centred on where the button sits.
-                gradient: theme.brightness == Brightness.dark
-                    ? RadialGradient(
-                        center: const Alignment(0, -.15),
-                        radius: .85,
-                        colors: [
-                          Colors.white.withValues(alpha: .045),
-                          Colors.white.withValues(alpha: .015),
-                          Colors.white.withValues(alpha: 0),
-                        ],
-                        stops: const [0, .45, 1],
-                      )
-                    : RadialGradient(
-                        center: const Alignment(0, -.15),
-                        radius: 1.1,
-                        colors: [
-                          Colors.white.withValues(alpha: .55),
-                          Colors.white.withValues(alpha: 0),
-                          Colors.black.withValues(alpha: .045),
-                        ],
-                        stops: const [0, .5, 1],
-                      ),
-                image: DecorationImage(
-                  image: const AssetImage('assets/images/world_map.png'), // Replace with your image path
-                  fit: BoxFit.cover,
-                  opacity: 0.09,
-                  colorFilter: theme.brightness == Brightness.dark
-                      ? ColorFilter.mode(Colors.white.withValues(alpha: .15), BlendMode.srcIn) //
-                      : ColorFilter.mode(
-                          Colors.grey.withValues(alpha: 1),
-                          BlendMode.srcATop,
-                        ), // Apply white tint in dark mode
-                ),
-              ),
-            ),
-          ),
+          // Strizh: плоский тёмный фон как на макете — без карты мира и радиального свечения.
+          const SizedBox.expand(),
           Stack(
             alignment: Alignment.center,
             children: [

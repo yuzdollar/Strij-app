@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/theme/app_theme.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
@@ -115,7 +116,10 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Assets.images.logo.svg(height: 76),
+                Assets.images.logo.svg(
+                  height: 76,
+                  colorFilter: const ColorFilter.mode(AppTheme.brandBlue, BlendMode.srcIn),
+                ),
                 const SizedBox(height: 18),
                 Text(
                   'Strizh',

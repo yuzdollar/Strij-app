@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiddify/features/home/widget/connection_button.dart';
+import 'package:hiddify/core/theme/app_theme.dart';
+import 'package:hiddify/features/connection/model/connection_status.dart';
+import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/proxy/model/proxy_entity.dart';
+import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,13 +40,14 @@ class StrizhConnectedBody extends ConsumerWidget {
       child: Column(
         children: [
           const Spacer(flex: 3),
-          const ConnectionButton(),
-          const Gap(6),
+          // Кольцо-подключение как на макете (тонкое синее кольцо + птица), плоское.
+          const _ConnectRing(),
+          const Gap(12),
           const ActiveProxyDelayIndicator(),
           const Spacer(flex: 3),
           _LocationChip(name: locationName, onTap: () => context.goNamed('proxies')),
           const Gap(14),
-          // Free — плашка «Бесплатно · 2 Мбит/с» (по макету, без «Unlimited»).
+          // Free — карточка «Бесплатно · 2 Мбит/с» (по макету, без «Unlimited»).
           // Premium — реальная полоса трафика подписки.
           if (isFree)
             _FreeQuota(theme: theme)
@@ -53,6 +57,67 @@ class StrizhConnectedBody extends ConsumerWidget {
           if (isFree) _PremiumButton(theme: theme),
         ],
       ),
+    );
+  }
+}
+
+/// Кольцо-подключение (по макету): тонкое синее кольцо, плоский тёмный центр, птица внутри.
+/// Тап — вкл/выкл. Под кольцом — статус (Подключено / Подключение… / Подключить).
+class _ConnectRing extends ConsumerWidget {
+  const _ConnectRing();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final status = ref.watch(connectionNotifierProvider).valueOrNull;
+    final connected = status is Connected || status is NoAvailableProxies || status is HotReloading;
+    final busy = status is Connecting || status is Waiting || status is Disconnecting;
+
+    final ringColor = connected
+        ? AppTheme.brandBlue
+        : busy
+        ? AppTheme.brandBlue.withValues(alpha: .6)
+        : theme.colorScheme.outlineVariant;
+    final birdColor = (connected || busy) ? AppTheme.brandBlue : theme.colorScheme.onSurfaceVariant;
+    final label = connected
+        ? 'Подключено'
+        : busy
+        ? 'Подключение…'
+        : 'Подключить';
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () => ref.read(connectionNotifierProvider.notifier).toggleConnection(),
+          child: SizedBox.square(
+            dimension: 168,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: .22),
+                    border: Border.all(color: ringColor, width: 4),
+                  ),
+                ),
+                if (busy)
+                  const SizedBox.square(
+                    dimension: 168,
+                    child: CircularProgressIndicator(strokeWidth: 3, color: AppTheme.brandBlue),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(54),
+                  child: Assets.images.logo.svg(colorFilter: ColorFilter.mode(birdColor, BlendMode.srcIn)),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Gap(16),
+        Text(label, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+      ],
     );
   }
 }
@@ -128,25 +193,30 @@ class _FreeQuota extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-            value: 1,
-            minHeight: 6,
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: .5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: 1,
+              minHeight: 6,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            ),
           ),
-        ),
-        const Gap(8),
-        Center(
-          child: Text(
+          const Gap(10),
+          Text(
             'Бесплатно · 2 Мбит/с',
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
