@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +10,44 @@ import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/features/proxy/active/ip_widget.dart';
+import 'package:hiddify/features/proxy/keep_top/country_names.dart';
 import 'package:hiddify/features/proxy/model/proxy_entity.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+/// Короткие русские названия стран для частых VPN-локаций (фолбэк — английское countryNames, затем код).
+const _ruCountry = <String, String>{
+  'US': 'США',
+  'GB': 'Великобритания',
+  'DE': 'Германия',
+  'NL': 'Нидерланды',
+  'FR': 'Франция',
+  'FI': 'Финляндия',
+  'SE': 'Швеция',
+  'PL': 'Польша',
+  'TR': 'Турция',
+  'JP': 'Япония',
+  'SG': 'Сингапур',
+  'HK': 'Гонконг',
+  'CA': 'Канада',
+  'CH': 'Швейцария',
+  'AT': 'Австрия',
+  'LT': 'Литва',
+  'LV': 'Латвия',
+  'EE': 'Эстония',
+  'CZ': 'Чехия',
+  'RO': 'Румыния',
+  'BG': 'Болгария',
+  'UA': 'Украина',
+  'KZ': 'Казахстан',
+  'RU': 'Россия',
+  'AE': 'ОАЭ',
+  'ES': 'Испания',
+  'IT': 'Италия',
+};
 
 /// Экран «подключено» в стиле макета (референс = телефон-превью на лендинге strizhvpn.com):
 /// большая кнопка-стриж + пинг + чип локации + полоса трафика + «Перейти на Premium».
@@ -33,7 +69,13 @@ class StrizhConnectedBody extends ConsumerWidget {
     final isFree = subInfo == null || profile.name.toLowerCase().contains('free');
 
     final activeProxy = ref.watch(activeProxyNotifierProvider).valueOrNull;
-    final locationName = (activeProxy?.name.isNotEmpty ?? false) ? activeProxy!.name : profile.name;
+    // Страна активного сервера — из геолокации его IP (как в списке прокси). Пока не определена —
+    // показываем имя профиля/сервера с глобусом.
+    final countryCode = activeProxy?.ipinfo.countryCode ?? '';
+    final cc = countryCode.toUpperCase();
+    final locationName = cc.isNotEmpty
+        ? (_ruCountry[cc] ?? countryNames[cc] ?? (activeProxy?.name ?? profile.name))
+        : ((activeProxy?.name.isNotEmpty ?? false) ? activeProxy!.name : profile.name);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 6, 22, 46),
@@ -45,7 +87,7 @@ class StrizhConnectedBody extends ConsumerWidget {
           const Gap(12),
           const ActiveProxyDelayIndicator(),
           const Spacer(flex: 3),
-          _LocationChip(name: locationName, onTap: () => context.goNamed('proxies')),
+          _LocationChip(countryCode: countryCode, name: locationName, onTap: () => context.goNamed('proxies')),
           const Gap(14),
           // Free — карточка «Бесплатно · 2 Мбит/с» (по макету, без «Unlimited»).
           // Premium — реальная полоса трафика подписки.
@@ -124,8 +166,9 @@ class _ConnectRing extends ConsumerWidget {
 
 /// Чип текущей локации: иконка + название сервера + шеврон. Тап открывает выбор локаций.
 class _LocationChip extends StatelessWidget {
-  const _LocationChip({required this.name, required this.onTap});
+  const _LocationChip({required this.countryCode, required this.name, required this.onTap});
 
+  final String countryCode;
   final String name;
   final VoidCallback onTap;
 
@@ -142,7 +185,11 @@ class _LocationChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           child: Row(
             children: [
-              Icon(Icons.public_rounded, size: 20, color: theme.colorScheme.primary),
+              // Флаг страны активного сервера (из геолокации IP); пока не определён — глобус.
+              if (countryCode.isNotEmpty)
+                IPCountryFlag(countryCode: countryCode, size: 26, radius: 6)
+              else
+                Icon(Icons.public_rounded, size: 20, color: theme.colorScheme.primary),
               const Gap(10),
               Expanded(
                 child: Text(
@@ -184,15 +231,98 @@ class _TrafficBar extends StatelessWidget {
   }
 }
 
-/// Бесплатный тариф: полоса + «Бесплатно · 2 Мбит/с» (по макету).
-/// Тайм-квота «Сегодня осталось 28:30» — отдельная фича heartbeat на бэкенде, добавим позже.
-class _FreeQuota extends StatelessWidget {
+/// Бесплатный тариф (по макету): карточка «Сегодня осталось MM:SS» + полоса + «Бесплатно · 2 Мбит/с».
+/// Дневной лимит времени считается ЛОКАЛЬНО (SharedPreferences): пока VPN подключён, время идёт,
+/// в полночь сбрасывается. На нуле — отключаемся и предлагаем Premium. Это клиентская оценка
+/// (не серверный учёт) — точный лимит потом перенесём на бэкенд.
+class _FreeQuota extends ConsumerStatefulWidget {
   const _FreeQuota({required this.theme});
 
   final ThemeData theme;
 
   @override
+  ConsumerState<_FreeQuota> createState() => _FreeQuotaState();
+}
+
+class _FreeQuotaState extends ConsumerState<_FreeQuota> {
+  static const int _limitSec = 30 * 60; // 30 минут в день
+  static const String _dayKey = 'strizh_free_day';
+  static const String _usedKey = 'strizh_free_used_sec';
+
+  SharedPreferences? _prefs;
+  int _used = 0;
+  bool _nudged = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  String _today() {
+    final n = DateTime.now();
+    return '${n.year}-${n.month}-${n.day}';
+  }
+
+  Future<void> _load() async {
+    final p = await SharedPreferences.getInstance();
+    if (p.getString(_dayKey) != _today()) {
+      await p.setString(_dayKey, _today());
+      await p.setInt(_usedKey, 0);
+    }
+    if (!mounted) return;
+    setState(() {
+      _prefs = p;
+      _used = p.getInt(_usedKey) ?? 0;
+    });
+  }
+
+  void _tick() {
+    final p = _prefs;
+    if (p == null) return;
+    // Смена суток — сброс.
+    if (p.getString(_dayKey) != _today()) {
+      p.setString(_dayKey, _today());
+      p.setInt(_usedKey, 0);
+      _nudged = false;
+      if (mounted) setState(() => _used = 0);
+      return;
+    }
+    // Считаем только пока VPN реально подключён.
+    final status = ref.read(connectionNotifierProvider).valueOrNull;
+    final connected = status is Connected || status is NoAvailableProxies || status is HotReloading;
+    if (!connected) return;
+
+    if (_used >= _limitSec) {
+      if (!_nudged) {
+        _nudged = true;
+        ref.read(connectionNotifierProvider.notifier).toggleConnection();
+        if (mounted) showStrizhPremiumSheet(context);
+      }
+      return;
+    }
+    final next = _used + 1;
+    if (next % 5 == 0) p.setInt(_usedKey, next);
+    if (mounted) setState(() => _used = next);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _prefs?.setInt(_usedKey, _used);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = widget.theme;
+    final remaining = (_limitSec - _used).clamp(0, _limitSec);
+    final mm = (remaining ~/ 60).toString().padLeft(2, '0');
+    final ss = (remaining % 60).toString().padLeft(2, '0');
+    final ratio = _limitSec == 0 ? 0.0 : remaining / _limitSec;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
@@ -202,10 +332,24 @@ class _FreeQuota extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Row(
+            children: [
+              Text(
+                'Сегодня осталось',
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+              const Spacer(),
+              Text(
+                '$mm:$ss',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+          const Gap(10),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
-              value: 1,
+              value: ratio,
               minHeight: 6,
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
             ),
