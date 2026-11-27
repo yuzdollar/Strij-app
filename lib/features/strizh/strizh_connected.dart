@@ -70,10 +70,11 @@ class StrizhConnectedBody extends ConsumerWidget {
     final isFree = subInfo == null || profile.name.toLowerCase().contains('free');
 
     final activeProxy = ref.watch(activeProxyNotifierProvider).valueOrNull;
-    // Страна сервера — из геолокации ВЫХОДНОГО IP (ipInfoNotifier, autoCheckIp=true по умолчанию):
-    // надёжнее, чем пер-прокси ipinfo. Пока не определена — имя сервера с глобусом.
-    final countryCode = ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '';
-    final cc = countryCode.toUpperCase();
+    // Страна = страна ВЫБРАННОГО сервера (как в списке прокси), чтобы чип и список совпадали.
+    // Фолбэк — гео выходного IP (ipInfoNotifier). Пока не определено — имя сервера с глобусом.
+    final proxyCc = activeProxy?.ipinfo.countryCode ?? '';
+    final exitCc = ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '';
+    final cc = (proxyCc.isNotEmpty ? proxyCc : exitCc).toUpperCase();
     final locationName = cc.isNotEmpty
         ? (_ruCountry[cc] ?? countryNames[cc] ?? (activeProxy?.name ?? profile.name))
         : ((activeProxy?.name.isNotEmpty ?? false) ? activeProxy!.name : profile.name);
@@ -88,7 +89,7 @@ class StrizhConnectedBody extends ConsumerWidget {
           const Gap(12),
           const ActiveProxyDelayIndicator(),
           const Spacer(flex: 3),
-          _LocationChip(countryCode: countryCode, name: locationName, onTap: () => context.goNamed('proxies')),
+          _LocationChip(countryCode: cc, name: locationName, onTap: () => context.goNamed('proxies')),
           const Gap(14),
           // Free — карточка «Бесплатно · 2 Мбит/с» (по макету, без «Unlimited»).
           // Premium — реальная полоса трафика подписки.

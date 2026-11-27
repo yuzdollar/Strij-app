@@ -22,8 +22,11 @@ class HomePage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
     final activeProfile = ref.watch(activeProfileProvider);
-    // Подсветка страны подключения на карте: центроид страны выходного IP.
-    final glowCode = (ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '').toUpperCase();
+    // Подсветка страны подключения на карте: страна выбранного сервера (как в списке),
+    // фолбэк — гео выходного IP. Так подсветка совпадает с чипом и списком.
+    final proxyCc = ref.watch(activeProxyNotifierProvider).valueOrNull?.ipinfo.countryCode ?? '';
+    final exitCc = ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '';
+    final glowCode = (proxyCc.isNotEmpty ? proxyCc : exitCc).toUpperCase();
     final glow = countryCentroids[glowCode];
 
     return Scaffold(
