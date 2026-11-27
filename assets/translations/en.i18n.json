@@ -1349,5 +1349,34 @@
       "missingLicense": "Psiphon license required",
       "missingLicenseMsg": "This profile uses Psiphon. Accept the Psiphon license to continue."
     }
+  },
+  "strizh": {
+    "tagline": "All you need for an open internet",
+    "startFree": "Start for free",
+    "loginOrRegister": "Log in or sign up",
+    "accountOnSite": "Account and plans — on the website",
+    "email": "Email",
+    "emailHint": "you@example.com",
+    "getCode": "Get code",
+    "back": "Back",
+    "codeSentTo": "Code sent to $to",
+    "loginAndConnect": "Log in and connect",
+    "changeEmail": "Change email",
+    "errEmail": "Enter a valid email",
+    "errCode": "Enter the code from the email",
+    "errNetwork": "Network error. Try again.",
+    "errApplySub": "Could not apply the subscription. Try again.",
+    "errNoSub": "No active subscription. Get Premium at strizhvpn.com",
+    "connect": "Connect",
+    "todayLeft": "Left today",
+    "freeSpeed": "Free · 2 Mbps",
+    "goPremium": "Go Premium",
+    "premium": "Premium",
+    "premiumTitle": "Full speed, no limits",
+    "premiumWorld": "Locations worldwide",
+    "choosePlan": "Choose a plan",
+    "opensSite": "Opens the Strizh website",
+    "account": "Account",
+    "signIn": "Sign in"
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/theme/app_theme.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/strizh/strizh_api.dart';
-import 'package:hiddify/features/strizh/strizh_l10n.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,8 +29,8 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   _Step _step = _Step.choose;
   bool _loading = false;
   String? _error;
-  // Локализация кастомных строк (RU/EN). Выставляется в build до любого взаимодействия.
-  StrizhL10n _s = const StrizhL10n(true);
+  // Переводы (slang). Выставляются в build до любого взаимодействия.
+  late Translations _t;
 
   @override
   void dispose() {
@@ -55,7 +55,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
       _setBusy(false, e.message);
       return;
     } catch (_) {
-      _setBusy(false, _s.errNetwork);
+      _setBusy(false, _t.strizh.errNetwork);
       return;
     }
     _setBusy(false);
@@ -68,7 +68,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
           userOverride: UserOverride(name: name),
         );
     if (ref.read(addProfileNotifierProvider).hasError) {
-      throw StrizhException(_s.errApplySub);
+      throw StrizhException(_t.strizh.errApplySub);
     }
     try {
       await ref.read(connectionNotifierProvider.notifier).toggleConnection();
@@ -83,7 +83,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   Future<void> _sendCode() => _run(() async {
         final email = _emailCtrl.text.trim();
         if (!email.contains('@') || !email.contains('.')) {
-          throw StrizhException(_s.errEmail);
+          throw StrizhException(_t.strizh.errEmail);
         }
         await _api.requestCode(email);
         if (mounted) setState(() => _step = _Step.code);
@@ -92,11 +92,11 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   Future<void> _verify() => _run(() async {
         final email = _emailCtrl.text.trim();
         final code = _codeCtrl.text.trim();
-        if (code.length < 4) throw StrizhException(_s.errCode);
+        if (code.length < 4) throw StrizhException(_t.strizh.errCode);
         final jwt = await _api.verify(email, code);
         final subId = await _api.premiumSubId(jwt);
         if (subId == null) {
-          throw StrizhException(_s.errNoSub);
+          throw StrizhException(_t.strizh.errNoSub);
         }
         await _activate(subId, 'Strizh VPN');
       });
@@ -110,7 +110,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    _s = StrizhL10n.of(context);
+    _t = ref.watch(translationsProvider).requireValue;
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
       child: Center(
@@ -131,7 +131,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _s.tagline,
+                  _t.strizh.tagline,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
@@ -178,7 +178,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
         return [
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: _free, style: _filledStyle, child: Text(_s.startFree)),
+            child: FilledButton(onPressed: _free, style: _filledStyle, child: Text(_t.strizh.startFree)),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -186,14 +186,14 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
             child: OutlinedButton(
               onPressed: () => setState(() => _step = _Step.email),
               style: _outlinedStyle,
-              child: Text(_s.loginOrRegister),
+              child: Text(_t.strizh.loginOrRegister),
             ),
           ),
           const SizedBox(height: 18),
           TextButton(
             onPressed: _openSite,
             child: Text(
-              _s.accountOnSite,
+              _t.strizh.accountOnSite,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ),
@@ -205,22 +205,22 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
             keyboardType: TextInputType.emailAddress,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: _s.email,
-              hintText: _s.emailHint,
+              labelText: _t.strizh.email,
+              hintText: _t.strizh.emailHint,
               border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: _sendCode, style: _filledStyle, child: Text(_s.getCode)),
+            child: FilledButton(onPressed: _sendCode, style: _filledStyle, child: Text(_t.strizh.getCode)),
           ),
-          TextButton(onPressed: () => setState(() => _step = _Step.choose), child: Text(_s.back)),
+          TextButton(onPressed: () => setState(() => _step = _Step.choose), child: Text(_t.strizh.back)),
         ];
       case _Step.code:
         return [
           Text(
-            _s.codeSentTo(_emailCtrl.text.trim()),
+            _t.strizh.codeSentTo(to: _emailCtrl.text.trim()),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall,
           ),
@@ -236,9 +236,9 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: _verify, style: _filledStyle, child: Text(_s.loginAndConnect)),
+            child: FilledButton(onPressed: _verify, style: _filledStyle, child: Text(_t.strizh.loginAndConnect)),
           ),
-          TextButton(onPressed: () => setState(() => _step = _Step.email), child: Text(_s.changeEmail)),
+          TextButton(onPressed: () => setState(() => _step = _Step.email), child: Text(_t.strizh.changeEmail)),
         ];
     }
   }

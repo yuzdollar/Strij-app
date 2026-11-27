@@ -5,7 +5,6 @@ import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/features/common/general_pref_tiles.dart';
-import 'package:hiddify/features/strizh/strizh_l10n.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -42,7 +41,6 @@ class SettingsPage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final devMode = ref.watch(Preferences.developerMode);
     final version = ref.watch(appInfoProvider).requireValue.presentVersion;
-    final s = StrizhL10n.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -63,11 +61,11 @@ class SettingsPage extends HookConsumerWidget {
           // Аккаунт
           ListTile(
             leading: const Icon(Icons.person_rounded),
-            title: Text(s.account),
+            title: Text(t.strizh.account),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(s.signIn, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text(t.strizh.signIn, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const Gap(4),
                 const Icon(Icons.chevron_right_rounded),
               ],

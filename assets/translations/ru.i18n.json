@@ -1371,5 +1371,34 @@
       "missingLicense": "Требуется лицензия Psiphon",
       "missingLicenseMsg": "Этот профиль использует Psiphon. Примите лицензию Psiphon, чтобы продолжить."
     }
+  },
+  "strizh": {
+    "tagline": "Интернет без границ",
+    "startFree": "Начать бесплатно",
+    "loginOrRegister": "Войти или зарегистрироваться",
+    "accountOnSite": "Аккаунт и тарифы — на сайте",
+    "email": "Email",
+    "emailHint": "you@example.com",
+    "getCode": "Получить код",
+    "back": "Назад",
+    "codeSentTo": "Код отправлен на $to",
+    "loginAndConnect": "Войти и подключиться",
+    "changeEmail": "Изменить email",
+    "errEmail": "Введи корректный email",
+    "errCode": "Введи код из письма",
+    "errNetwork": "Ошибка сети. Попробуй ещё раз.",
+    "errApplySub": "Не удалось применить подписку. Попробуй ещё раз.",
+    "errNoSub": "Нет активной подписки. Оформи Premium на strizhvpn.com",
+    "connect": "Подключить",
+    "todayLeft": "Сегодня осталось",
+    "freeSpeed": "Бесплатно · 2 Мбит/с",
+    "goPremium": "Перейти на Premium",
+    "premium": "Premium",
+    "premiumTitle": "Полная скорость, без лимитов",
+    "premiumWorld": "Локации по всему миру",
+    "choosePlan": "Выбрать тариф",
+    "opensSite": "Откроется сайт Strizh",
+    "account": "Аккаунт",
+    "signIn": "Войти"
   }
 }
