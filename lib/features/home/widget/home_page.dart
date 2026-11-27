@@ -57,8 +57,31 @@ class HomePage extends HookConsumerWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Strizh: плоский тёмный фон как на макете — без карты мира и радиального свечения.
-          const SizedBox.expand(),
+          // Strizh: карта мира на тёмном фоне (по просьбе) + мягкое синее свечение к центру.
+          RepaintBoundary(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0, -.25),
+                  radius: .9,
+                  colors: [
+                    AppTheme.brandBlue.withValues(alpha: theme.brightness == Brightness.dark ? .10 : .06),
+                    AppTheme.brandBlue.withValues(alpha: 0),
+                  ],
+                  stops: const [0, 1],
+                ),
+                image: DecorationImage(
+                  image: const AssetImage('assets/images/world_map.png'),
+                  fit: BoxFit.cover,
+                  opacity: theme.brightness == Brightness.dark ? 0.08 : 0.06,
+                  colorFilter: ColorFilter.mode(
+                    theme.brightness == Brightness.dark ? Colors.white.withValues(alpha: .25) : Colors.black54,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+          ),
           Stack(
             alignment: Alignment.center,
             children: [

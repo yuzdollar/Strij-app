@@ -13,6 +13,7 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/proxy/active/ip_widget.dart';
 import 'package:hiddify/features/proxy/keep_top/country_names.dart';
 import 'package:hiddify/features/proxy/model/proxy_entity.dart';
+import 'package:hiddify/features/strizh/strizh_l10n.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -121,11 +122,12 @@ class _ConnectRing extends ConsumerWidget {
         ? AppTheme.brandBlue.withValues(alpha: .6)
         : theme.colorScheme.outlineVariant;
     final birdColor = (connected || busy) ? AppTheme.brandBlue : theme.colorScheme.onSurfaceVariant;
+    final s = StrizhL10n.of(context);
     final label = connected
-        ? 'Подключено'
+        ? s.connected
         : busy
-        ? 'Подключение…'
-        : 'Подключить';
+        ? s.connecting
+        : s.connect;
 
     return Column(
       children: [
@@ -318,6 +320,7 @@ class _FreeQuotaState extends ConsumerState<_FreeQuota> {
   @override
   Widget build(BuildContext context) {
     final theme = widget.theme;
+    final s = StrizhL10n.of(context);
     final remaining = (_limitSec - _used).clamp(0, _limitSec);
     final mm = (remaining ~/ 60).toString().padLeft(2, '0');
     final ss = (remaining % 60).toString().padLeft(2, '0');
@@ -335,7 +338,7 @@ class _FreeQuotaState extends ConsumerState<_FreeQuota> {
           Row(
             children: [
               Text(
-                'Сегодня осталось',
+                s.todayLeft,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
               const Spacer(),
@@ -356,7 +359,7 @@ class _FreeQuotaState extends ConsumerState<_FreeQuota> {
           ),
           const Gap(10),
           Text(
-            'Бесплатно · 2 Мбит/с',
+            s.freeSpeed,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
@@ -383,7 +386,7 @@ class _PremiumButton extends StatelessWidget {
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
         ),
         icon: const Icon(Icons.bolt_rounded, size: 20),
-        label: const Text('Перейти на Premium'),
+        label: Text(StrizhL10n.of(context).goPremium),
       ),
     );
   }
@@ -398,6 +401,7 @@ Future<void> showStrizhPremiumSheet(BuildContext context) {
     isScrollControlled: true,
     builder: (context) {
       final theme = Theme.of(context);
+      final s = StrizhL10n.of(context);
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
@@ -407,7 +411,7 @@ Future<void> showStrizhPremiumSheet(BuildContext context) {
               Row(
                 children: [
                   Text(
-                    'Premium',
+                    s.premium,
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
                   ),
                   const Spacer(),
@@ -429,7 +433,7 @@ Future<void> showStrizhPremiumSheet(BuildContext context) {
               ),
               const Gap(18),
               Text(
-                'Полная скорость, без лимитов',
+                s.premiumTitle,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
@@ -440,7 +444,7 @@ Future<void> showStrizhPremiumSheet(BuildContext context) {
                   Icon(Icons.public_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   const Gap(6),
                   Text(
-                    'Локации по всему миру',
+                    s.premiumWorld,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
@@ -464,12 +468,12 @@ Future<void> showStrizhPremiumSheet(BuildContext context) {
                     textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                   ),
                   icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                  label: const Text('Выбрать тариф'),
+                  label: Text(s.choosePlan),
                 ),
               ),
               const Gap(10),
               Text(
-                'Откроется сайт Strizh',
+                s.opensSite,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ],

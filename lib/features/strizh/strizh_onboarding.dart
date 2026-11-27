@@ -4,6 +4,7 @@ import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/strizh/strizh_api.dart';
+import 'package:hiddify/features/strizh/strizh_l10n.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,6 +29,8 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   _Step _step = _Step.choose;
   bool _loading = false;
   String? _error;
+  // Локализация кастомных строк (RU/EN). Выставляется в build до любого взаимодействия.
+  StrizhL10n _s = const StrizhL10n(true);
 
   @override
   void dispose() {
@@ -52,7 +55,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
       _setBusy(false, e.message);
       return;
     } catch (_) {
-      _setBusy(false, 'Ошибка сети. Попробуй ещё раз.');
+      _setBusy(false, _s.errNetwork);
       return;
     }
     _setBusy(false);
@@ -65,7 +68,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
           userOverride: UserOverride(name: name),
         );
     if (ref.read(addProfileNotifierProvider).hasError) {
-      throw StrizhException('Не удалось применить подписку. Попробуй ещё раз.');
+      throw StrizhException(_s.errApplySub);
     }
     try {
       await ref.read(connectionNotifierProvider.notifier).toggleConnection();
@@ -80,7 +83,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   Future<void> _sendCode() => _run(() async {
         final email = _emailCtrl.text.trim();
         if (!email.contains('@') || !email.contains('.')) {
-          throw StrizhException('Введи корректный email');
+          throw StrizhException(_s.errEmail);
         }
         await _api.requestCode(email);
         if (mounted) setState(() => _step = _Step.code);
@@ -89,11 +92,11 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   Future<void> _verify() => _run(() async {
         final email = _emailCtrl.text.trim();
         final code = _codeCtrl.text.trim();
-        if (code.length < 4) throw StrizhException('Введи код из письма');
+        if (code.length < 4) throw StrizhException(_s.errCode);
         final jwt = await _api.verify(email, code);
         final subId = await _api.premiumSubId(jwt);
         if (subId == null) {
-          throw StrizhException('Нет активной подписки. Оформи Premium на strizhvpn.com');
+          throw StrizhException(_s.errNoSub);
         }
         await _activate(subId, 'Strizh VPN');
       });
@@ -107,6 +110,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    _s = StrizhL10n.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
       child: Center(
@@ -127,7 +131,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Интернет без границ',
+                  _s.tagline,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
@@ -174,7 +178,7 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
         return [
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: _free, style: _filledStyle, child: const Text('Начать бесплатно')),
+            child: FilledButton(onPressed: _free, style: _filledStyle, child: Text(_s.startFree)),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -182,14 +186,14 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
             child: OutlinedButton(
               onPressed: () => setState(() => _step = _Step.email),
               style: _outlinedStyle,
-              child: const Text('Войти или зарегистрироваться'),
+              child: Text(_s.loginOrRegister),
             ),
           ),
           const SizedBox(height: 18),
           TextButton(
             onPressed: _openSite,
             child: Text(
-              'Аккаунт и тарифы — на сайте',
+              _s.accountOnSite,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ),
@@ -200,23 +204,23 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
             controller: _emailCtrl,
             keyboardType: TextInputType.emailAddress,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              hintText: 'you@example.com',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: _s.email,
+              hintText: _s.emailHint,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: _sendCode, style: _filledStyle, child: const Text('Получить код')),
+            child: FilledButton(onPressed: _sendCode, style: _filledStyle, child: Text(_s.getCode)),
           ),
-          TextButton(onPressed: () => setState(() => _step = _Step.choose), child: const Text('Назад')),
+          TextButton(onPressed: () => setState(() => _step = _Step.choose), child: Text(_s.back)),
         ];
       case _Step.code:
         return [
           Text(
-            'Код отправлен на ${_emailCtrl.text.trim()}',
+            _s.codeSentTo(_emailCtrl.text.trim()),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall,
           ),
@@ -232,9 +236,9 @@ class _StrizhOnboardingState extends ConsumerState<StrizhOnboarding> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: _verify, style: _filledStyle, child: const Text('Войти и подключиться')),
+            child: FilledButton(onPressed: _verify, style: _filledStyle, child: Text(_s.loginAndConnect)),
           ),
-          TextButton(onPressed: () => setState(() => _step = _Step.email), child: const Text('Изменить email')),
+          TextButton(onPressed: () => setState(() => _step = _Step.email), child: Text(_s.changeEmail)),
         ];
     }
   }
