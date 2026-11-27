@@ -6,7 +6,9 @@ import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/theme/app_theme.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
+import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/strizh/strizh_connected.dart';
+import 'package:hiddify/features/strizh/strizh_geo.dart';
 import 'package:hiddify/features/strizh/strizh_onboarding.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -20,6 +22,9 @@ class HomePage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
     final activeProfile = ref.watch(activeProfileProvider);
+    // Подсветка страны подключения на карте: центроид страны выходного IP.
+    final glowCode = (ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '').toUpperCase();
+    final glow = countryCentroids[glowCode];
 
     return Scaffold(
       appBar: AppBar(
@@ -82,6 +87,48 @@ class HomePage extends HookConsumerWidget {
               ),
             ),
           ),
+          // Strizh: свечение страны подключения на карте (cover-проекция равнопрямоугольной карты).
+          if (glow != null)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    const imgAspect = 2.111; // 2550x1208
+                    final w = c.maxWidth;
+                    final h = c.maxHeight;
+                    final scaledH = (w / imgAspect > h) ? w / imgAspect : h; // cover
+                    final scaledW = imgAspect * scaledH;
+                    final fx = (glow.$2 + 180) / 360; // долгота → доля ширины
+                    final fy = (90 - glow.$1) / 180; // широта → доля высоты
+                    final px = (w - scaledW) / 2 + fx * scaledW;
+                    final py = (h - scaledH) / 2 + fy * scaledH;
+                    return Stack(
+                      children: [
+                        Positioned(
+                          left: px - 75,
+                          top: py - 75,
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  AppTheme.brandBlue.withValues(alpha: .45),
+                                  AppTheme.brandBlue.withValues(alpha: .12),
+                                  AppTheme.brandBlue.withValues(alpha: 0),
+                                ],
+                                stops: const [0, .45, 1],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
           Stack(
             alignment: Alignment.center,
             children: [

@@ -70,9 +70,9 @@ class StrizhConnectedBody extends ConsumerWidget {
     final isFree = subInfo == null || profile.name.toLowerCase().contains('free');
 
     final activeProxy = ref.watch(activeProxyNotifierProvider).valueOrNull;
-    // Страна активного сервера — из геолокации его IP (как в списке прокси). Пока не определена —
-    // показываем имя профиля/сервера с глобусом.
-    final countryCode = activeProxy?.ipinfo.countryCode ?? '';
+    // Страна сервера — из геолокации ВЫХОДНОГО IP (ipInfoNotifier, autoCheckIp=true по умолчанию):
+    // надёжнее, чем пер-прокси ipinfo. Пока не определена — имя сервера с глобусом.
+    final countryCode = ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '';
     final cc = countryCode.toUpperCase();
     final locationName = cc.isNotEmpty
         ? (_ruCountry[cc] ?? countryNames[cc] ?? (activeProxy?.name ?? profile.name))
