@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Бастау",
     "version": "Нұсқа",
     "ok": "Жарайды",
@@ -1287,5 +1287,34 @@
       "missingLicense": "Psiphon лицензиясы қажет",
       "missingLicenseMsg": "Бұл профиль Psiphon пайдаланады. Жалғастыру үшін Psiphon лицензиясын қабылдаңыз."
     }
+  },
+  "strizh": {
+    "tagline": "Шекарасыз интернет",
+    "startFree": "Тегін бастау",
+    "loginOrRegister": "Кіру немесе тіркелу",
+    "accountOnSite": "Аккаунт пен тарифтер — сайтта",
+    "email": "Email",
+    "emailHint": "you@example.com",
+    "getCode": "Код алу",
+    "back": "Артқа",
+    "codeSentTo": "Код $to мекенжайына жіберілді",
+    "loginAndConnect": "Кіру және қосылу",
+    "changeEmail": "Emailді өзгерту",
+    "errEmail": "Дұрыс email енгізіңіз",
+    "errCode": "Хаттағы кодты енгізіңіз",
+    "errNetwork": "Желі қатесі. Қайталап көріңіз.",
+    "errApplySub": "Жазылымды қолдану мүмкін болмады. Қайталаңыз.",
+    "errNoSub": "Белсенді жазылым жоқ. strizhvpn.com-да Premium алыңыз",
+    "connect": "Қосылу",
+    "todayLeft": "Бүгін қалды",
+    "freeSpeed": "Тегін · 2 Мбит/с",
+    "goPremium": "Premium-ға өту",
+    "premium": "Premium",
+    "premiumTitle": "Толық жылдамдық, шексіз",
+    "premiumWorld": "Әлем бойынша локациялар",
+    "choosePlan": "Тариф таңдау",
+    "opensSite": "Strizh сайты ашылады",
+    "account": "Аккаунт",
+    "signIn": "Кіру"
   }
 }

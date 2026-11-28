@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "هیدیفای",
+    "appTitle": "Strizh",
     "start": "شروع",
     "version": "نسخه",
     "ok": "باشه",
@@ -1349,5 +1349,34 @@
       "missingLicense": "لایسنس Psiphon لازم است",
       "missingLicenseMsg": "این پروفایل از Psiphon استفاده می‌کند. برای ادامه، لایسنس Psiphon را بپذیرید."
     }
+  },
+  "strizh": {
+    "tagline": "اینترنت بدون مرز",
+    "startFree": "شروع رایگان",
+    "loginOrRegister": "ورود یا ثبت‌نام",
+    "accountOnSite": "حساب و تعرفه‌ها — در وب‌سایت",
+    "email": "ایمیل",
+    "emailHint": "you@example.com",
+    "getCode": "دریافت کد",
+    "back": "بازگشت",
+    "codeSentTo": "کد به $to ارسال شد",
+    "loginAndConnect": "ورود و اتصال",
+    "changeEmail": "تغییر ایمیل",
+    "errEmail": "یک ایمیل معتبر وارد کنید",
+    "errCode": "کد داخل ایمیل را وارد کنید",
+    "errNetwork": "خطای شبکه. دوباره تلاش کنید.",
+    "errApplySub": "اعمال اشتراک ناموفق بود. دوباره تلاش کنید.",
+    "errNoSub": "اشتراک فعالی نیست. از strizhvpn.com پریمیوم بگیرید",
+    "connect": "اتصال",
+    "todayLeft": "باقی‌مانده امروز",
+    "freeSpeed": "رایگان · 2 Mbps",
+    "goPremium": "ارتقا به Premium",
+    "premium": "Premium",
+    "premiumTitle": "سرعت کامل، بدون محدودیت",
+    "premiumWorld": "مکان‌ها در سراسر جهان",
+    "choosePlan": "انتخاب تعرفه",
+    "opensSite": "وب‌سایت Strizh باز می‌شود",
+    "account": "حساب",
+    "signIn": "ورود"
   }
 }

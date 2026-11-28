@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Başla",
     "version": "Wersiýa",
     "ok": "OK",
@@ -1287,5 +1287,34 @@
       "missingLicense": "Psiphon ygtyýarnamasy gerek",
       "missingLicenseMsg": "Bu profil Psiphon ulanýar. Dowam etmek üçin Psiphon ygtyýarnamasyny kabul ediň."
     }
+  },
+  "strizh": {
+    "tagline": "Serhetsiz internet",
+    "startFree": "Mugt başla",
+    "loginOrRegister": "Gir ýa-da hasaba al",
+    "accountOnSite": "Hasap we nyrhlar — saýtda",
+    "email": "Email",
+    "emailHint": "you@example.com",
+    "getCode": "Kod al",
+    "back": "Yza",
+    "codeSentTo": "Kod $to salga iberildi",
+    "loginAndConnect": "Gir we birik",
+    "changeEmail": "Emaili üýtget",
+    "errEmail": "Dogry email giriz",
+    "errCode": "Hatdaky kody giriz",
+    "errNetwork": "Tor ýalňyşlygy. Gaýtadan synanyş.",
+    "errApplySub": "Abunany ulanyp bolmady. Gaýtadan synanyş.",
+    "errNoSub": "Işjeň abuna ýok. strizhvpn.com-da Premium al",
+    "connect": "Birik",
+    "todayLeft": "Şu gün galan",
+    "freeSpeed": "Mugt · 2 Mbit/s",
+    "goPremium": "Premium-a geç",
+    "premium": "Premium",
+    "premiumTitle": "Doly tizlik, çäksiz",
+    "premiumWorld": "Dünýä boýunça ýerler",
+    "choosePlan": "Nyrh saýla",
+    "opensSite": "Strizh saýty açylar",
+    "account": "Hasap",
+    "signIn": "Gir"
   }
 }

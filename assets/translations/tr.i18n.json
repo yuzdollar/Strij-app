@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Başlat",
     "version": "Sürüm",
     "ok": "Tamam",
@@ -1292,5 +1292,34 @@
       "missingLicense": "Psiphon lisansı gerekli",
       "missingLicenseMsg": "Bu profil Psiphon kullanıyor. Devam etmek için Psiphon lisansını kabul edin."
     }
+  },
+  "strizh": {
+    "tagline": "Sınırsız internet",
+    "startFree": "Ücretsiz başla",
+    "loginOrRegister": "Giriş yap veya kaydol",
+    "accountOnSite": "Hesap ve planlar — web sitesinde",
+    "email": "E-posta",
+    "emailHint": "you@example.com",
+    "getCode": "Kod al",
+    "back": "Geri",
+    "codeSentTo": "Kod $to adresine gönderildi",
+    "loginAndConnect": "Giriş yap ve bağlan",
+    "changeEmail": "E-postayı değiştir",
+    "errEmail": "Geçerli bir e-posta gir",
+    "errCode": "E-postadaki kodu gir",
+    "errNetwork": "Ağ hatası. Tekrar dene.",
+    "errApplySub": "Abonelik uygulanamadı. Tekrar dene.",
+    "errNoSub": "Etkin abonelik yok. strizhvpn.com'dan Premium al",
+    "connect": "Bağlan",
+    "todayLeft": "Bugün kalan",
+    "freeSpeed": "Ücretsiz · 2 Mbps",
+    "goPremium": "Premium'a geç",
+    "premium": "Premium",
+    "premiumTitle": "Tam hız, limitsiz",
+    "premiumWorld": "Dünya genelinde konumlar",
+    "choosePlan": "Plan seç",
+    "opensSite": "Strizh web sitesi açılır",
+    "account": "Hesap",
+    "signIn": "Giriş yap"
   }
 }

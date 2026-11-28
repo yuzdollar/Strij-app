@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "开始",
     "version": "版本",
     "ok": "确定",
@@ -1292,5 +1292,34 @@
       "missingLicense": "需要 Psiphon 许可证",
       "missingLicenseMsg": "此配置文件使用 Psiphon。请同意 Psiphon 许可证以继续。"
     }
+  },
+  "strizh": {
+    "tagline": "无边界互联网",
+    "startFree": "免费开始",
+    "loginOrRegister": "登录或注册",
+    "accountOnSite": "账户和套餐 — 在网站上",
+    "email": "邮箱",
+    "emailHint": "you@example.com",
+    "getCode": "获取验证码",
+    "back": "返回",
+    "codeSentTo": "验证码已发送至 $to",
+    "loginAndConnect": "登录并连接",
+    "changeEmail": "更改邮箱",
+    "errEmail": "请输入有效的邮箱",
+    "errCode": "请输入邮件中的验证码",
+    "errNetwork": "网络错误，请重试。",
+    "errApplySub": "无法应用订阅，请重试。",
+    "errNoSub": "没有有效订阅。请在 strizhvpn.com 开通 Premium",
+    "connect": "连接",
+    "todayLeft": "今日剩余",
+    "freeSpeed": "免费 · 2 Mbps",
+    "goPremium": "升级到 Premium",
+    "premium": "Premium",
+    "premiumTitle": "全速，无限制",
+    "premiumWorld": "全球服务器",
+    "choosePlan": "选择套餐",
+    "opensSite": "将打开 Strizh 网站",
+    "account": "账户",
+    "signIn": "登录"
   }
 }

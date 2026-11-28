@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Почати",
     "version": "Версія",
     "ok": "OK",
@@ -1313,5 +1313,34 @@
       "missingLicense": "Потрібна ліцензія Psiphon",
       "missingLicenseMsg": "Цей профіль використовує Psiphon. Прийміть ліцензію Psiphon, щоб продовжити."
     }
+  },
+  "strizh": {
+    "tagline": "Інтернет без кордонів",
+    "startFree": "Почати безкоштовно",
+    "loginOrRegister": "Увійти або зареєструватися",
+    "accountOnSite": "Акаунт і тарифи — на сайті",
+    "email": "Email",
+    "emailHint": "you@example.com",
+    "getCode": "Отримати код",
+    "back": "Назад",
+    "codeSentTo": "Код надіслано на $to",
+    "loginAndConnect": "Увійти та підключитися",
+    "changeEmail": "Змінити email",
+    "errEmail": "Введіть коректний email",
+    "errCode": "Введіть код з листа",
+    "errNetwork": "Помилка мережі. Спробуйте ще раз.",
+    "errApplySub": "Не вдалося застосувати підписку. Спробуйте ще раз.",
+    "errNoSub": "Немає активної підписки. Оформіть Premium на strizhvpn.com",
+    "connect": "Підключити",
+    "todayLeft": "Залишилось сьогодні",
+    "freeSpeed": "Безкоштовно · 2 Мбіт/с",
+    "goPremium": "Перейти на Premium",
+    "premium": "Premium",
+    "premiumTitle": "Повна швидкість, без лімітів",
+    "premiumWorld": "Локації по всьому світу",
+    "choosePlan": "Обрати тариф",
+    "opensSite": "Відкриється сайт Strizh",
+    "account": "Акаунт",
+    "signIn": "Увійти"
   }
 }

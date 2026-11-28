@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Boshlash",
     "version": "Versiya",
     "ok": "OK",
@@ -1287,5 +1287,34 @@
       "missingLicense": "Psiphon litsenziyasi kerak",
       "missingLicenseMsg": "Bu profil Psiphon’dan foydalanadi. Davom etish uchun Psiphon litsenziyasini qabul qiling."
     }
+  },
+  "strizh": {
+    "tagline": "Chegarasiz internet",
+    "startFree": "Bepul boshlash",
+    "loginOrRegister": "Kirish yoki ro'yxatdan o'tish",
+    "accountOnSite": "Hisob va tariflar — saytda",
+    "email": "Email",
+    "emailHint": "you@example.com",
+    "getCode": "Kod olish",
+    "back": "Orqaga",
+    "codeSentTo": "Kod $to manziliga yuborildi",
+    "loginAndConnect": "Kirish va ulanish",
+    "changeEmail": "Emailni o'zgartirish",
+    "errEmail": "To'g'ri email kiriting",
+    "errCode": "Xatdagi kodni kiriting",
+    "errNetwork": "Tarmoq xatosi. Qayta urining.",
+    "errApplySub": "Obunani qo'llab bo'lmadi. Qayta urining.",
+    "errNoSub": "Faol obuna yo'q. strizhvpn.com'da Premium oling",
+    "connect": "Ulanish",
+    "todayLeft": "Bugun qolgan",
+    "freeSpeed": "Bepul · 2 Mbit/s",
+    "goPremium": "Premium'ga o'tish",
+    "premium": "Premium",
+    "premiumTitle": "To'liq tezlik, cheksiz",
+    "premiumWorld": "Butun dunyo bo'ylab joylar",
+    "choosePlan": "Tarif tanlang",
+    "opensSite": "Strizh sayti ochiladi",
+    "account": "Hisob",
+    "signIn": "Kirish"
   }
 }

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Starten",
     "version": "Versie",
     "ok": "OK",
@@ -1287,5 +1287,34 @@
       "missingLicense": "Psiphon-licentie vereist",
       "missingLicenseMsg": "Dit profiel gebruikt Psiphon. Accepteer de Psiphon-licentie om door te gaan."
     }
+  },
+  "strizh": {
+    "tagline": "Internet zonder grenzen",
+    "startFree": "Gratis beginnen",
+    "loginOrRegister": "Inloggen of registreren",
+    "accountOnSite": "Account en abonnementen — op de website",
+    "email": "E-mail",
+    "emailHint": "you@example.com",
+    "getCode": "Code ontvangen",
+    "back": "Terug",
+    "codeSentTo": "Code verstuurd naar $to",
+    "loginAndConnect": "Inloggen en verbinden",
+    "changeEmail": "E-mail wijzigen",
+    "errEmail": "Voer een geldig e-mailadres in",
+    "errCode": "Voer de code uit de e-mail in",
+    "errNetwork": "Netwerkfout. Probeer opnieuw.",
+    "errApplySub": "Kon abonnement niet toepassen. Probeer opnieuw.",
+    "errNoSub": "Geen actief abonnement. Koop Premium op strizhvpn.com",
+    "connect": "Verbinden",
+    "todayLeft": "Vandaag over",
+    "freeSpeed": "Gratis · 2 Mbps",
+    "goPremium": "Upgrade naar Premium",
+    "premium": "Premium",
+    "premiumTitle": "Volle snelheid, geen limieten",
+    "premiumWorld": "Locaties wereldwijd",
+    "choosePlan": "Kies een abonnement",
+    "opensSite": "Opent de Strizh-website",
+    "account": "Account",
+    "signIn": "Inloggen"
   }
 }

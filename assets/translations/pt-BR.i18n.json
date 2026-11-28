@@ -1,6 +1,6 @@
 {
   "common": {
-    "appTitle": "Hiddify",
+    "appTitle": "Strizh",
     "start": "Começar",
     "version": "Versão",
     "ok": "OK",
@@ -1287,5 +1287,34 @@
       "missingLicense": "Licença do Psiphon necessária",
       "missingLicenseMsg": "Este perfil usa Psiphon. Aceite a licença do Psiphon para continuar."
     }
+  },
+  "strizh": {
+    "tagline": "Internet sem fronteiras",
+    "startFree": "Começar grátis",
+    "loginOrRegister": "Entrar ou cadastrar-se",
+    "accountOnSite": "Conta e planos — no site",
+    "email": "E-mail",
+    "emailHint": "you@example.com",
+    "getCode": "Receber código",
+    "back": "Voltar",
+    "codeSentTo": "Código enviado para $to",
+    "loginAndConnect": "Entrar e conectar",
+    "changeEmail": "Alterar e-mail",
+    "errEmail": "Digite um e-mail válido",
+    "errCode": "Digite o código do e-mail",
+    "errNetwork": "Erro de rede. Tente novamente.",
+    "errApplySub": "Não foi possível aplicar a assinatura. Tente novamente.",
+    "errNoSub": "Sem assinatura ativa. Assine o Premium em strizhvpn.com",
+    "connect": "Conectar",
+    "todayLeft": "Restante hoje",
+    "freeSpeed": "Grátis · 2 Mbps",
+    "goPremium": "Mudar para Premium",
+    "premium": "Premium",
+    "premiumTitle": "Velocidade total, sem limites",
+    "premiumWorld": "Locais no mundo todo",
+    "choosePlan": "Escolher plano",
+    "opensSite": "Abre o site da Strizh",
+    "account": "Conta",
+    "signIn": "Entrar"
   }
 }
