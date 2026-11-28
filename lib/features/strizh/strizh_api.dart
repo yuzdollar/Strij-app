@@ -1,3 +1,4 @@
+import 'package:android_id/android_id.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -70,8 +71,14 @@ class StrizhApi {
     throw last ?? StrizhException('Ошибка сети');
   }
 
-  /// Стабильный идентификатор устройства для free-учёта (генерим один раз, храним локально).
+  /// Идентификатор устройства для free-учёта. СТАБИЛЬНЫЙ: Android ANDROID_ID переживает
+  /// переустановку приложения (иначе лимит сбрасывался «удалил-поставил»). Фолбэк — случайный
+  /// UUID в локальном хранилище (если ANDROID_ID недоступен).
   Future<String> hwid() async {
+    try {
+      final aid = await const AndroidId().getId();
+      if (aid != null && aid.length >= 8) return 'aid-$aid';
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     var id = prefs.getString('strizh_hwid');
     if (id == null || id.isEmpty) {
@@ -79,6 +86,28 @@ class StrizhApi {
       await prefs.setString('strizh_hwid', id);
     }
     return id;
+  }
+
+  /// Остаток бесплатного времени на сегодня (сервер — источник правды).
+  /// {used_seconds, limit_seconds, remaining_seconds} или null при ошибке.
+  Future<Map<String, dynamic>?> freeQuota() async {
+    final hw = await hwid();
+    try {
+      final r = await _send('GET', '/free/quota?hwid=${Uri.encodeQueryComponent(hw)}');
+      if (r.statusCode == 200 && r.data is Map) return Map<String, dynamic>.from(r.data as Map);
+    } catch (_) {}
+    return null;
+  }
+
+  /// Отправить накопленные секунды использования; сервер списывает и возвращает
+  /// {remaining_seconds, stop}. null при ошибке сети (тогда приложение считает локально дальше).
+  Future<Map<String, dynamic>?> freeHeartbeat(int seconds) async {
+    final hw = await hwid();
+    try {
+      final r = await _send('POST', '/free/heartbeat', data: {'hwid': hw, 'seconds': seconds});
+      if (r.statusCode == 200 && r.data is Map) return Map<String, dynamic>.from(r.data as Map);
+    } catch (_) {}
+    return null;
   }
 
   /// Free: по hwid получаем sub_id бесплатной подписки (30 мин/день).

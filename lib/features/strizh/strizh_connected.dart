@@ -14,9 +14,9 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/proxy/active/ip_widget.dart';
 import 'package:hiddify/features/proxy/keep_top/country_names.dart';
 import 'package:hiddify/features/proxy/model/proxy_entity.dart';
+import 'package:hiddify/features/strizh/strizh_api.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Короткие русские названия стран для частых VPN-локаций (фолбэк — английское countryNames, затем код).
@@ -235,9 +235,10 @@ class _TrafficBar extends StatelessWidget {
 }
 
 /// Бесплатный тариф (по макету): карточка «Сегодня осталось MM:SS» + полоса + «Бесплатно · 2 Мбит/с».
-/// Дневной лимит времени считается ЛОКАЛЬНО (SharedPreferences): пока VPN подключён, время идёт,
-/// в полночь сбрасывается. На нуле — отключаемся и предлагаем Premium. Это клиентская оценка
-/// (не серверный учёт) — точный лимит потом перенесём на бэкенд.
+/// Учёт СЕРВЕРНЫЙ (источник правды — бэкенд, по стабильному ID устройства): при открытии берём
+/// остаток (/free/quota), каждую секунду тикаем локально для плавности, раз в 30 сек шлём
+/// накопленное на /free/heartbeat и сверяем остаток. На нуле (или stop от сервера) — отключаемся
+/// и показываем Premium. Переустановка не сбрасывает лимит (ID стабильный, см. StrizhApi.hwid).
 class _FreeQuota extends ConsumerStatefulWidget {
   const _FreeQuota({required this.theme});
 
@@ -248,73 +249,82 @@ class _FreeQuota extends ConsumerStatefulWidget {
 }
 
 class _FreeQuotaState extends ConsumerState<_FreeQuota> {
-  static const int _limitSec = 30 * 60; // 30 минут в день
-  static const String _dayKey = 'strizh_free_day';
-  static const String _usedKey = 'strizh_free_used_sec';
-
-  SharedPreferences? _prefs;
-  int _used = 0;
+  final _api = StrizhApi();
+  int _limit = 30 * 60;
+  int? _remaining; // null — ещё не загрузили с сервера
+  int _elapsed = 0; // секунды с последней отправки heartbeat
+  int _retry = 0;
   bool _nudged = false;
+  bool _hb = false;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _loadQuota();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
-  String _today() {
-    final n = DateTime.now();
-    return '${n.year}-${n.month}-${n.day}';
-  }
-
-  Future<void> _load() async {
-    final p = await SharedPreferences.getInstance();
-    if (p.getString(_dayKey) != _today()) {
-      await p.setString(_dayKey, _today());
-      await p.setInt(_usedKey, 0);
-    }
-    if (!mounted) return;
+  Future<void> _loadQuota() async {
+    final q = await _api.freeQuota();
+    if (!mounted || q == null) return;
     setState(() {
-      _prefs = p;
-      _used = p.getInt(_usedKey) ?? 0;
+      _limit = (q['limit_seconds'] as num?)?.toInt() ?? _limit;
+      _remaining = (q['remaining_seconds'] as num?)?.toInt();
     });
   }
 
+  bool get _connected {
+    final s = ref.read(connectionNotifierProvider).valueOrNull;
+    return s is Connected || s is NoAvailableProxies || s is HotReloading;
+  }
+
+  void _nudge() {
+    if (_nudged) return;
+    _nudged = true;
+    ref.read(connectionNotifierProvider.notifier).toggleConnection();
+    if (mounted) showStrizhPremiumSheet(context);
+  }
+
+  Future<void> _sendHeartbeat() async {
+    if (_hb || _elapsed <= 0) return;
+    _hb = true;
+    final secs = _elapsed;
+    _elapsed = 0;
+    final res = await _api.freeHeartbeat(secs);
+    _hb = false;
+    if (res == null || !mounted) return;
+    final rem = (res['remaining_seconds'] as num?)?.toInt();
+    if (rem != null) setState(() => _remaining = rem);
+    if (res['stop'] == true || (rem != null && rem <= 0)) _nudge();
+  }
+
   void _tick() {
-    final p = _prefs;
-    if (p == null) return;
-    // Смена суток — сброс.
-    if (p.getString(_dayKey) != _today()) {
-      p.setString(_dayKey, _today());
-      p.setInt(_usedKey, 0);
-      _nudged = false;
-      if (mounted) setState(() => _used = 0);
+    // Ещё не загрузили остаток — повторяем попытку раз в ~8 сек.
+    if (_remaining == null) {
+      if (++_retry % 8 == 0) _loadQuota();
       return;
     }
     // Считаем только пока VPN реально подключён.
-    final status = ref.read(connectionNotifierProvider).valueOrNull;
-    final connected = status is Connected || status is NoAvailableProxies || status is HotReloading;
-    if (!connected) return;
-
-    if (_used >= _limitSec) {
-      if (!_nudged) {
-        _nudged = true;
-        ref.read(connectionNotifierProvider.notifier).toggleConnection();
-        if (mounted) showStrizhPremiumSheet(context);
-      }
+    if (!_connected) {
+      if (_elapsed > 0) _sendHeartbeat(); // долить накопленное на паузе
       return;
     }
-    final next = _used + 1;
-    if (next % 5 == 0) p.setInt(_usedKey, next);
-    if (mounted) setState(() => _used = next);
+    if (_remaining! <= 0) {
+      _nudge();
+      return;
+    }
+    setState(() {
+      _remaining = _remaining! - 1;
+      _elapsed++;
+    });
+    if (_elapsed >= 30) _sendHeartbeat();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _prefs?.setInt(_usedKey, _used);
+    if (_elapsed > 0) _api.freeHeartbeat(_elapsed); // долить при уходе с экрана
     super.dispose();
   }
 
@@ -322,10 +332,10 @@ class _FreeQuotaState extends ConsumerState<_FreeQuota> {
   Widget build(BuildContext context) {
     final theme = widget.theme;
     final t = ref.watch(translationsProvider).requireValue;
-    final remaining = (_limitSec - _used).clamp(0, _limitSec);
-    final mm = (remaining ~/ 60).toString().padLeft(2, '0');
-    final ss = (remaining % 60).toString().padLeft(2, '0');
-    final ratio = _limitSec == 0 ? 0.0 : remaining / _limitSec;
+    final rem = _remaining;
+    final mm = rem == null ? '--' : (rem ~/ 60).toString().padLeft(2, '0');
+    final ss = rem == null ? '--' : (rem % 60).toString().padLeft(2, '0');
+    final double ratio = (rem == null || _limit == 0) ? 1.0 : (rem / _limit).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
