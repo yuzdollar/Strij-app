@@ -26,8 +26,9 @@ class HomePage extends HookConsumerWidget {
     // фолбэк — гео выходного IP. Так подсветка совпадает с чипом и списком.
     final proxyCc = ref.watch(activeProxyNotifierProvider).valueOrNull?.ipinfo.countryCode ?? '';
     final exitCc = ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '';
-    final glowCode = (proxyCc.isNotEmpty ? proxyCc : exitCc).toUpperCase();
-    final glow = countryCentroids[glowCode];
+    final liveCc = (proxyCc.isNotEmpty ? proxyCc : exitCc).toUpperCase();
+    if (liveCc.isNotEmpty) lastConnectedCountry = liveCc; // «липкая» страна (общая с чипом)
+    final glow = countryCentroids[lastConnectedCountry];
 
     return Scaffold(
       appBar: AppBar(

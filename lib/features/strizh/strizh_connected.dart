@@ -15,6 +15,7 @@ import 'package:hiddify/features/proxy/active/ip_widget.dart';
 import 'package:hiddify/features/proxy/keep_top/country_names.dart';
 import 'package:hiddify/features/proxy/model/proxy_entity.dart';
 import 'package:hiddify/features/strizh/strizh_api.dart';
+import 'package:hiddify/features/strizh/strizh_geo.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -74,7 +75,9 @@ class StrizhConnectedBody extends ConsumerWidget {
     // Фолбэк — гео выходного IP (ipInfoNotifier). Пока не определено — имя сервера с глобусом.
     final proxyCc = activeProxy?.ipinfo.countryCode ?? '';
     final exitCc = ref.watch(ipInfoNotifierProvider).valueOrNull?.countryCode ?? '';
-    final cc = (proxyCc.isNotEmpty ? proxyCc : exitCc).toUpperCase();
+    final live = (proxyCc.isNotEmpty ? proxyCc : exitCc).toUpperCase();
+    if (live.isNotEmpty) lastConnectedCountry = live; // запоминаем — чтобы флаг не откатывался
+    final cc = lastConnectedCountry;
     final locationName = cc.isNotEmpty
         ? (_ruCountry[cc] ?? countryNames[cc] ?? (activeProxy?.name ?? profile.name))
         : ((activeProxy?.name.isNotEmpty ?? false) ? activeProxy!.name : profile.name);
